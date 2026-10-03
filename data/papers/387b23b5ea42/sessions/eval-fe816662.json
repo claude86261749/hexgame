@@ -1,0 +1,816 @@
+{
+ "id": "eval-fe816662",
+ "paperId": "387b23b5ea42",
+ "startedAt": "2026-10-03T14:18:25.676Z",
+ "duration": 45.933428699,
+ "events": [
+  {
+   "t": 1.1059271590000002,
+   "kind": "guide",
+   "text": "Welcome to the "
+  },
+  {
+   "t": 1.352783132,
+   "kind": "guide",
+   "text": "DINOv3 guide."
+  },
+  {
+   "t": 1.5863046880000002,
+   "kind": "guide",
+   "text": " I'm here to walk"
+  },
+  {
+   "t": 1.85747791,
+   "kind": "guide",
+   "text": " you through the paper"
+  },
+  {
+   "t": 2.055020035,
+   "kind": "guide",
+   "text": " and its key diagrams."
+  },
+  {
+   "t": 2.311751143,
+   "kind": "guide",
+   "text": " What would you like"
+  },
+  {
+   "t": 2.539557618,
+   "kind": "guide",
+   "text": " to understand first?"
+  },
+  {
+   "t": 2.820653957,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g1"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 8.189288176,
+   "kind": "you",
+   "text": "What is the one new idea in this paper, in plain words?"
+  },
+  {
+   "t": 8.244778418000001,
+   "kind": "turn"
+  },
+  {
+   "t": 8.889573563999999,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g3"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 8.90799154,
+   "kind": "turn"
+  },
+  {
+   "t": 9.490584869,
+   "kind": "guide",
+   "text": "The new idea "
+  },
+  {
+   "t": 9.774388614,
+   "kind": "guide",
+   "text": "is Gram anchoring,"
+  },
+  {
+   "t": 10.007999196,
+   "kind": "guide",
+   "text": " which locks the similarity"
+  },
+  {
+   "t": 10.25935732,
+   "kind": "guide",
+   "text": " between patch"
+  },
+  {
+   "t": 10.542237332000001,
+   "kind": "guide",
+   "text": " features. This"
+  },
+  {
+   "t": 10.767859624,
+   "kind": "guide",
+   "text": " keeps dense spatial"
+  },
+  {
+   "t": 10.998385878,
+   "kind": "guide",
+   "text": " maps clean without"
+  },
+  {
+   "t": 11.194138781000001,
+   "kind": "guide",
+   "text": " freezing the features"
+  },
+  {
+   "t": 11.459398338,
+   "kind": "guide",
+   "text": " themselves."
+  },
+  {
+   "t": 16.913629154,
+   "kind": "you",
+   "text": "How is it different from DINOv2?"
+  },
+  {
+   "t": 16.957220239999998,
+   "kind": "turn"
+  },
+  {
+   "t": 17.536870402,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g5"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 17.555032051999998,
+   "kind": "turn"
+  },
+  {
+   "t": 18.588608088999997,
+   "kind": "guide",
+   "text": "DINOv3 scales up "
+  },
+  {
+   "t": 18.796717801,
+   "kind": "guide",
+   "text": "from DINOv2's"
+  },
+  {
+   "t": 19.080806205000002,
+   "kind": "guide",
+   "text": " one point one"
+  },
+  {
+   "t": 19.270851994,
+   "kind": "guide",
+   "text": " billion parameters"
+  },
+  {
+   "t": 19.525781005000002,
+   "kind": "guide",
+   "text": " to six point seven"
+  },
+  {
+   "t": 19.753443231,
+   "kind": "guide",
+   "text": " billion, while"
+  },
+  {
+   "t": 19.991119694,
+   "kind": "guide",
+   "text": " adding Gram anchoring"
+  },
+  {
+   "t": 20.337804624,
+   "kind": "guide",
+   "text": " to prevent dense"
+  },
+  {
+   "t": 20.494345253,
+   "kind": "guide",
+   "text": " feature degradation."
+  },
+  {
+   "t": 25.560065829,
+   "kind": "you",
+   "text": "Can you draw what someone would need to change in their own code or setup to use this?"
+  },
+  {
+   "t": 25.603176462,
+   "kind": "turn"
+  },
+  {
+   "t": 26.25422659,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "What changes are needed in a setup to use Gram anchoring?",
+    "nav": "Code Changes for Gram Anchoring",
+    "head": "Integrating Gram Anchoring Into Existing Pipelines"
+   },
+   "result": {
+    "custom_id": "c1",
+    "targets": [],
+    "next": "draw_from_scratch"
+   }
+  },
+  {
+   "t": 26.284817742999998,
+   "kind": "turn"
+  },
+  {
+   "t": 27.14262337,
+   "kind": "guide",
+   "text": "I'm drawing the required "
+  },
+  {
+   "t": 27.440710989,
+   "kind": "guide",
+   "text": "additions to a"
+  },
+  {
+   "t": 27.684528945999997,
+   "kind": "guide",
+   "text": " standard training pipeline"
+  },
+  {
+   "t": 27.912122180999997,
+   "kind": "guide",
+   "text": " for Gram anchoring."
+  },
+  {
+   "t": 28.247296647,
+   "kind": "tool",
+   "name": "draw_from_scratch",
+   "args": {
+    "custom_id": "c1",
+    "type": "pipeline",
+    "brief": "A diagram showing the additions for Gram anchoring: the active student network, the calculation of the student's Gram matrix, the storage of an older model checkpoint as a frozen Gram teacher, the down-sampling step, the anchor Gram matrix, and the Gram loss that constrains the student's patch relationships to those of the older model."
+   },
+   "result": {
+    "started": true
+   }
+  },
+  {
+   "t": 31.678268432,
+   "kind": "turn"
+  },
+  {
+   "t": 37.065308703,
+   "kind": "tool",
+   "name": "scratch_ready",
+   "args": {
+    "custom_id": "c1"
+   },
+   "result": {
+    "spec": {
+     "id": "c1",
+     "nav": "Code Changes for Gram Anchoring",
+     "head": "Integrating Gram Anchoring Into Existing Pipelines",
+     "body": [
+      "Gram anchoring prevents dense feature collapse in long training runs. Instead of forcing individual patch embeddings to match, it penalizes differences in patch similarity matrices.",
+      "The student processes global crops at standard resolution. A frozen checkpoint, the Gram teacher, processes the same crops at twice the resolution before its feature map is down-sampled.",
+      "Comparing the two Gram matrices allows individual features to adapt while preserving clean spatial structure."
+     ],
+     "hint": "Select a step to see it drawn out.",
+     "sources": [
+      "s4.2",
+      "s4.3",
+      "sC"
+     ],
+     "type": "pipeline",
+     "steps": [
+      {
+       "id": "inputs",
+       "label": "Dual inputs",
+       "title": "Feed crops at two resolutions",
+       "note": "Global crops enter the active student at standard resolution (256x256), while entering the frozen Gram teacher at twice the resolution (512x512). Rotary position embeddings handle the difference.",
+       "sources": [
+        "s4.3",
+        "sC"
+       ],
+       "detail": {
+        "kind": "flow",
+        "direction": "LR",
+        "nodes": [
+         {
+          "id": "crop",
+          "label": "Global crop",
+          "sub": "Input image",
+          "kind": "input",
+          "note": "Sampled global crops are passed to both pathways simultaneously.",
+          "sources": [
+           "s4.2",
+           "sC"
+          ]
+         },
+         {
+          "id": "res_stud",
+          "label": "Student crop",
+          "sub": "256x256 resolution",
+          "kind": "default",
+          "note": "The active student processes the standard 256x256 image crop.",
+          "sources": [
+           "s4.3",
+           "sC"
+          ]
+         },
+         {
+          "id": "res_teach",
+          "label": "Teacher crop",
+          "sub": "512x512 resolution",
+          "kind": "default",
+          "note": "The frozen Gram teacher receives the same crop at twice the spatial resolution.",
+          "sources": [
+           "s4.3"
+          ]
+         }
+        ],
+        "edges": [
+         {
+          "from": "crop",
+          "to": "res_stud",
+          "label": "1x"
+         },
+         {
+          "from": "crop",
+          "to": "res_teach",
+          "label": "2x"
+         }
+        ]
+       }
+      },
+      {
+       "id": "features",
+       "label": "Features",
+       "title": "Extract and down-sample patch maps",
+       "note": "The student outputs patch features at native resolution. The Gram teacher outputs features from double resolution, which are down-sampled by 2x using bicubic interpolation.",
+       "sources": [
+        "s4.3"
+       ],
+       "detail": {
+        "kind": "flow",
+        "direction": "TB",
+        "nodes": [
+         {
+          "id": "stud_model",
+          "label": "Student ViT",
+          "sub": "Active parameters",
+          "kind": "default",
+          "note": "The current model being trained with DINO, iBOT, and KoLeo losses.",
+          "sources": [
+           "s4.2"
+          ]
+         },
+         {
+          "id": "gram_model",
+          "label": "Gram teacher",
+          "sub": "Frozen checkpoint",
+          "kind": "accent",
+          "note": "An early checkpoint from 100k or 200k steps, held frozen to retain clean spatial properties.",
+          "sources": [
+           "s4.2",
+           "s4.3"
+          ]
+         },
+         {
+          "id": "stud_feats",
+          "label": "Student map",
+          "sub": "P patch vectors",
+          "kind": "default",
+          "note": "L2-normalized patch features X_S of dimension P by d.",
+          "sources": [
+           "s4.2"
+          ]
+         },
+         {
+          "id": "teach_down",
+          "label": "Down-sampled map",
+          "sub": "2x bicubic pool",
+          "kind": "accent",
+          "note": "Teacher features down-sampled to P patch vectors matching student dimensions.",
+          "sources": [
+           "s4.3"
+          ]
+         }
+        ],
+        "edges": [
+         {
+          "from": "stud_model",
+          "to": "stud_feats"
+         },
+         {
+          "from": "gram_model",
+          "to": "teach_down",
+          "label": "2x pool"
+         }
+        ]
+       }
+      },
+      {
+       "id": "matrices",
+       "label": "Gram mats",
+       "title": "Compute pairwise patch similarities",
+       "note": "Each patch feature is L2-normalized. Computing dot products across all P patches produces a P-by-P Gram matrix representing internal spatial relations for that crop.",
+       "sources": [
+        "s4.2"
+       ],
+       "detail": {
+        "kind": "matrix",
+        "panels": [
+         {
+          "id": "mat_stud",
+          "label": "Student Gram (X_S X_S^T)",
+          "size": 8,
+          "preset": "noisy-blocks",
+          "note": "Pairwise similarity matrix of student patch vectors. Without anchoring, it becomes noisy.",
+          "sources": [
+           "s4.2"
+          ]
+         },
+         {
+          "id": "mat_teach",
+          "label": "Teacher Gram (X_G X_G^T)",
+          "size": 8,
+          "preset": "blocks",
+          "accent": true,
+          "note": "Pairwise similarity matrix from the smoothed, high-resolution early teacher.",
+          "sources": [
+           "s4.2",
+           "s4.3"
+          ]
+         }
+        ],
+        "links": [
+         {
+          "from": "mat_stud",
+          "to": "mat_teach",
+          "label": "penalize difference"
+         }
+        ]
+       }
+      },
+      {
+       "id": "loss",
+       "label": "Gram loss",
+       "title": "Apply Gram loss and update teacher",
+       "note": "Frobenius norm between both Gram matrices forms the loss, weighted by 2. The Gram teacher is updated to the EMA teacher every 10k iterations.",
+       "sources": [
+        "s4.2",
+        "sC"
+       ],
+       "detail": {
+        "kind": "bullets",
+        "items": [
+         "Loss: squared Frobenius norm ||X_S X_S^T - X_G X_G^T||_F^2",
+         "Loss weight w_Gram = 2 added to DINO, iBOT, and KoLeo",
+         "Gram teacher updated to EMA teacher every 10k iterations"
+        ]
+       }
+      }
+     ],
+     "phases": [
+      {
+       "label": "forward passes",
+       "from": "inputs",
+       "to": "features"
+      },
+      {
+       "label": "anchoring objective",
+       "from": "matrices",
+       "to": "loss"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "t": 37.911812512,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "addNode",
+      "text": "You maintain an older frozen checkpoint as the Gram teacher to compute the anchor Gram matrix.",
+      "to": "res_teach"
+     },
+     {
+      "op": "addNode",
+      "text": "You calculate the student Gram matrix during training and compare it against the anchor matrix using the Gram loss.",
+      "to": "loss"
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 37.926086735,
+   "kind": "turn"
+  },
+  {
+   "t": 38.60016845,
+   "kind": "guide",
+   "text": "To use Gram "
+  },
+  {
+   "t": 38.860674953,
+   "kind": "guide",
+   "text": "anchoring, you maintain"
+  },
+  {
+   "t": 39.053911795,
+   "kind": "guide",
+   "text": " an older frozen"
+  },
+  {
+   "t": 39.337926659,
+   "kind": "guide",
+   "text": " checkpoint as a Gram"
+  },
+  {
+   "t": 39.60307422499999,
+   "kind": "guide",
+   "text": " teacher. You then calculate"
+  },
+  {
+   "t": 39.919531498,
+   "kind": "guide",
+   "text": " your student's"
+  },
+  {
+   "t": 40.148128739,
+   "kind": "guide",
+   "text": " Gram matrix and compare"
+  },
+  {
+   "t": 40.306005309,
+   "kind": "guide",
+   "text": " it against this anchor"
+  },
+  {
+   "t": 40.538784658,
+   "kind": "guide",
+   "text": " using a Gram loss."
+  },
+  {
+   "t": 40.917477913,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c1",
+    "summary": "Integrating Gram anchoring requires maintaining an older checkpoint as a Gram teacher and adding a Gram loss during training to align patch relationships."
+   },
+   "result": {
+    "ok": true
+   }
+  }
+ ],
+ "customs": [
+  {
+   "id": "c1",
+   "question": "What changes are needed in a setup to use Gram anchoring?",
+   "base": null,
+   "nav": "Code Changes for Gram Anchoring",
+   "head": "Integrating Gram Anchoring Into Existing Pipelines",
+   "summary": "Integrating Gram anchoring requires maintaining an older checkpoint as a Gram teacher and adding a Gram loss during training to align patch relationships.",
+   "spec": {
+    "id": "c1",
+    "nav": "Code Changes for Gram Anchoring",
+    "head": "Integrating Gram Anchoring Into Existing Pipelines",
+    "body": [
+     "Gram anchoring prevents dense feature collapse in long training runs. Instead of forcing individual patch embeddings to match, it penalizes differences in patch similarity matrices.",
+     "The student processes global crops at standard resolution. A frozen checkpoint, the Gram teacher, processes the same crops at twice the resolution before its feature map is down-sampled.",
+     "Comparing the two Gram matrices allows individual features to adapt while preserving clean spatial structure."
+    ],
+    "hint": "Select a step to see it drawn out.",
+    "sources": [
+     "s4.2",
+     "s4.3",
+     "sC"
+    ],
+    "type": "pipeline",
+    "steps": [
+     {
+      "id": "inputs",
+      "label": "Dual inputs",
+      "title": "Feed crops at two resolutions",
+      "note": "Global crops enter the active student at standard resolution (256x256), while entering the frozen Gram teacher at twice the resolution (512x512). Rotary position embeddings handle the difference.",
+      "sources": [
+       "s4.3",
+       "sC"
+      ],
+      "detail": {
+       "kind": "flow",
+       "direction": "LR",
+       "nodes": [
+        {
+         "id": "crop",
+         "label": "Global crop",
+         "sub": "Input image",
+         "kind": "input",
+         "note": "Sampled global crops are passed to both pathways simultaneously.",
+         "sources": [
+          "s4.2",
+          "sC"
+         ]
+        },
+        {
+         "id": "res_stud",
+         "label": "Student crop",
+         "sub": "256x256 resolution",
+         "kind": "default",
+         "note": "The active student processes the standard 256x256 image crop.",
+         "sources": [
+          "s4.3",
+          "sC"
+         ]
+        },
+        {
+         "id": "res_teach",
+         "label": "Teacher crop",
+         "sub": "512x512 resolution",
+         "kind": "default",
+         "note": "The frozen Gram teacher receives the same crop at twice the spatial resolution.",
+         "sources": [
+          "s4.3"
+         ]
+        }
+       ],
+       "edges": [
+        {
+         "from": "crop",
+         "to": "res_stud",
+         "label": "1x"
+        },
+        {
+         "from": "crop",
+         "to": "res_teach",
+         "label": "2x"
+        }
+       ]
+      }
+     },
+     {
+      "id": "features",
+      "label": "Features",
+      "title": "Extract and down-sample patch maps",
+      "note": "The student outputs patch features at native resolution. The Gram teacher outputs features from double resolution, which are down-sampled by 2x using bicubic interpolation.",
+      "sources": [
+       "s4.3"
+      ],
+      "detail": {
+       "kind": "flow",
+       "direction": "TB",
+       "nodes": [
+        {
+         "id": "stud_model",
+         "label": "Student ViT",
+         "sub": "Active parameters",
+         "kind": "default",
+         "note": "The current model being trained with DINO, iBOT, and KoLeo losses.",
+         "sources": [
+          "s4.2"
+         ]
+        },
+        {
+         "id": "gram_model",
+         "label": "Gram teacher",
+         "sub": "Frozen checkpoint",
+         "kind": "accent",
+         "note": "An early checkpoint from 100k or 200k steps, held frozen to retain clean spatial properties.",
+         "sources": [
+          "s4.2",
+          "s4.3"
+         ]
+        },
+        {
+         "id": "stud_feats",
+         "label": "Student map",
+         "sub": "P patch vectors",
+         "kind": "default",
+         "note": "L2-normalized patch features X_S of dimension P by d.",
+         "sources": [
+          "s4.2"
+         ]
+        },
+        {
+         "id": "teach_down",
+         "label": "Down-sampled map",
+         "sub": "2x bicubic pool",
+         "kind": "accent",
+         "note": "Teacher features down-sampled to P patch vectors matching student dimensions.",
+         "sources": [
+          "s4.3"
+         ]
+        }
+       ],
+       "edges": [
+        {
+         "from": "stud_model",
+         "to": "stud_feats"
+        },
+        {
+         "from": "gram_model",
+         "to": "teach_down",
+         "label": "2x pool"
+        }
+       ]
+      }
+     },
+     {
+      "id": "matrices",
+      "label": "Gram mats",
+      "title": "Compute pairwise patch similarities",
+      "note": "Each patch feature is L2-normalized. Computing dot products across all P patches produces a P-by-P Gram matrix representing internal spatial relations for that crop.",
+      "sources": [
+       "s4.2"
+      ],
+      "detail": {
+       "kind": "matrix",
+       "panels": [
+        {
+         "id": "mat_stud",
+         "label": "Student Gram (X_S X_S^T)",
+         "size": 8,
+         "preset": "noisy-blocks",
+         "note": "Pairwise similarity matrix of student patch vectors. Without anchoring, it becomes noisy.",
+         "sources": [
+          "s4.2"
+         ]
+        },
+        {
+         "id": "mat_teach",
+         "label": "Teacher Gram (X_G X_G^T)",
+         "size": 8,
+         "preset": "blocks",
+         "accent": true,
+         "note": "Pairwise similarity matrix from the smoothed, high-resolution early teacher.",
+         "sources": [
+          "s4.2",
+          "s4.3"
+         ]
+        }
+       ],
+       "links": [
+        {
+         "from": "mat_stud",
+         "to": "mat_teach",
+         "label": "penalize difference"
+        }
+       ]
+      }
+     },
+     {
+      "id": "loss",
+      "label": "Gram loss",
+      "title": "Apply Gram loss and update teacher",
+      "note": "Frobenius norm between both Gram matrices forms the loss, weighted by 2. The Gram teacher is updated to the EMA teacher every 10k iterations.",
+      "sources": [
+       "s4.2",
+       "sC"
+      ],
+      "detail": {
+       "kind": "bullets",
+       "items": [
+        "Loss: squared Frobenius norm ||X_S X_S^T - X_G X_G^T||_F^2",
+        "Loss weight w_Gram = 2 added to DINO, iBOT, and KoLeo",
+        "Gram teacher updated to EMA teacher every 10k iterations"
+       ]
+      }
+     }
+    ],
+    "phases": [
+     {
+      "label": "forward passes",
+      "from": "inputs",
+      "to": "features"
+     },
+     {
+      "label": "anchoring objective",
+      "from": "matrices",
+      "to": "loss"
+     }
+    ]
+   },
+   "steps": [
+    [
+     {
+      "op": "addNode",
+      "text": "You maintain an older frozen checkpoint as the Gram teacher to compute the anchor Gram matrix.",
+      "to": "res_teach"
+     },
+     {
+      "op": "addNode",
+      "text": "You calculate the student Gram matrix during training and compare it against the anchor matrix using the Gram loss.",
+      "to": "loss"
+     }
+    ]
+   ],
+   "pending": false
+  }
+ ],
+ "title": "Scripted eval session"
+}

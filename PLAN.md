@@ -5,7 +5,7 @@ Goal: rebuild the DINOv3 "explained in diagrams" prototype as a React app that w
 the paper. `gemini-3.8-live` runs the spoken or typed guide, which draws custom diagrams
 in answer to the reader's questions. Sessions are recorded and can be replayed.
 
-Status: plan only. Nothing is implemented yet.
+Status: **MVP implemented** (see README.md). Milestones M0–M4 are done; M5 has a first corpus of two papers; M6 is partial. See §12 for what's verified and what isn't.
 
 ---
 
@@ -260,3 +260,32 @@ Each call logs a JSONL line: stage, latency, tokens, validation outcome and repa
 - **"Papers you have read"** needs a reader library. Without one, the landscape falls back to citations.
 - **A DINOv3 `.md` source is needed for M2**: supply one, or I convert arXiv 2508.10104's HTML.
 - Defaults assumed unless you say otherwise: voice + text, Node server, Vite/React/TS, a local file store with no database or auth.
+
+---
+
+## 12. MVP status (2026-10-03)
+
+Verified in this environment:
+- **Probe**: key, both models, `responseJsonSchema`, non-blocking live tool calls, compression and resumption config, ephemeral tokens.
+- **Pipeline on two unrelated papers** (DINOv3, DeepSeek-R1). Each produced 5 diagrams plus the map, none dropped, 0 layout issues, 0 bad citations. Each took about 90–100 s, using about 200–300k input tokens and 10–12 calls. The fact-check rewrote 3 sentences per paper.
+- **Live harness against `gemini-3.8-live`** over text:
+  - Zero tool errors after prompt tuning.
+  - Comparison and "why" questions each get a new custom diagram on the right base, with 2 steps.
+  - A from-scratch drawing ran in the background while the guide spoke.
+  - Sessions were saved and replay in the UI.
+- **UI**: Playwright screenshots of every diagram type, pipeline steps, the phone layout and session replay. 13 unit tests pass.
+
+Not verified here:
+- **Browser-to-Gemini live audio.** The browser path uses the same executor and config as the verified Node harness, but headless Chromium in this container cannot reach Gemini without disabling TLS verification. Microphone capture and audio playback still need a run in a real browser.
+
+Changes from the plan:
+- The type set is final for the MVP: `flow`, `pipeline`, `chart`, `matrix`, `compare`, `sim` (similarity map only), `landscape` (built from the digest with no model call), and `free`.
+- Gemini rejects `minItems`/`maxItems` on arrays of objects with a generic 400. The harness strips them from the JSON Schema, and zod plus the repair loop still enforce them.
+- No `library.json` yet. The map shows the papers the paper cites, not the papers the reader has read.
+
+Next:
+- Run live sessions in a real browser and tune the voice prompt from them.
+- Grow the eval corpus to 5–6 papers (theory, systems, bio, a messy PDF conversion).
+- Context caching for the paper text across the spec calls.
+- More sim kinds.
+- A reading library for the map.

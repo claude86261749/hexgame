@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-03T13:50:44.137Z",
+  "models": {
+    "ok": true,
+    "ms": 171,
+    "count": 61
+  },
+  "flash_json_schema": {
+    "ok": true,
+    "ms": 977,
+    "parsed": {
+      "nodes": [
+        {
+          "id": "step1",
+          "label": "Boil fresh water",
+          "kind": "step"
+        },
+        {
+          "id": "step2",
+          "label": "Steep the tea bag",
+          "kind": "step"
+        }
+      ]
+    },
+    "thoughts": 0
+  },
+  "live_nonblocking_tool": {
+    "ok": true,
+    "ms": 8448,
+    "calls": [
+      "draw"
+    ],
+    "transcript": "Sure, I can map out those steps for you.I'm putting together a diagram that outlines the entire process.",
+    "turns": 2,
+    "audio": 421128,
+    "resumable": true
+  },
+  "ephemeral_token": {
+    "ok": true,
+    "ms": 117,
+    "prefix": "auth_tokens/"
+  }
+}

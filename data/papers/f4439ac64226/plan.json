@@ -1,0 +1,69 @@
+{
+ "diagrams": [
+  {
+   "id": "g1",
+   "type": "pipeline",
+   "nav": "Four-stage training pipeline",
+   "question": "How does DeepSeek-R1 build reasoning models using reinforcement learning, rejection sampling, and distillation?",
+   "mustShow": "Five sequential phases in post-training: 1) Cold-start data generation and fine-tuning on DeepSeek-V3-Base. 2) Reasoning RL using GRPO with rule rewards and language consistency penalties. 3) Rejection sampling of 600,000 reasoning paths merged with 200,000 non-reasoning prompts for broad SFT. 4) Secondary preference RL combining rule-based reasoning rewards with helpfulness and safety reward models. 5) Distillation of the 800,000 curated dataset into smaller open models including Qwen and Llama.",
+   "sources": [
+    "s3",
+    "s3.2.1",
+    "s3.2.2",
+    "sB.3.3",
+    "sF"
+   ]
+  },
+  {
+   "id": "g2",
+   "type": "flow",
+   "nav": "GRPO reward and update flow",
+   "question": "How does Group Relative Policy Optimization train reasoning without a separate critic network?",
+   "mustShow": "Flow of GRPO: A prompt generates a group of outputs from the current policy. Each output receives an outcome reward from rule-based checks for accuracy and format compliance. Reward scores are normalized across the group using mean and standard deviation to compute advantages. The policy updates using a clipped surrogate objective with a reference policy penalty, eliminating the memory and compute overhead of a separate critic network.",
+   "sources": [
+    "s2.1",
+    "s2.2",
+    "sA.3"
+   ]
+  },
+  {
+   "id": "g3",
+   "type": "chart",
+   "nav": "Reasoning dynamics during RL",
+   "question": "How do reasoning accuracy and thinking token length evolve as pure reinforcement learning progresses?",
+   "mustShow": "Dual curves plotted against training steps for DeepSeek-R1-Zero: Pass@1 accuracy on AIME 2024 increasing from 15.6% to 77.9%, and average output token length expanding from under 1,000 tokens to over 8,000 tokens. Highlighted stages along the x axis show initial short answers, the emergence of self-reflection and backtracking behaviors during the 'aha moment', and extended test-time computation at convergence.",
+   "sources": [
+    "s2.3",
+    "sC.1",
+    "sC.2",
+    "sE.4"
+   ]
+  },
+  {
+   "id": "g4",
+   "type": "compare",
+   "nav": "DeepSeek-R1-Zero vs R1",
+   "question": "What differentiates pure RL in DeepSeek-R1-Zero from the full multi-stage DeepSeek-R1?",
+   "mustShow": "Comparison table contrasting DeepSeek-R1-Zero with DeepSeek-R1 across key dimensions: starting checkpoint (raw base vs cold-start SFT), reward design (rule-based only vs rule-based plus language consistency and neural reward models), language consistency (severe language mixing vs uniform target language), output readability (unstructured thoughts vs clean reasoning tags and final summary), and AIME 2024 pass@1 solve rate (77.9% vs 79.8%).",
+   "sources": [
+    "s2.3",
+    "s3",
+    "s3.1",
+    "sB.6",
+    "sD.2"
+   ]
+  },
+  {
+   "id": "g5",
+   "type": "compare",
+   "nav": "Distillation vs direct RL",
+   "question": "How does supervised distillation from R1 compare to direct reinforcement learning on smaller models?",
+   "mustShow": "Comparison table contrasting direct RL on base models against supervised distillation of R1 trajectories into student models. Rows show Qwen2.5-32B, Qwen2.5-14B, and Qwen2.5-7B across benchmarks including AIME 2024, MATH-500, and Codeforces. Highlight that distillation from the 800,000 reasoning traces substantially outperforms direct RL on smaller base models, such as 72.6% versus 47.0% on AIME 2024 for Qwen2.5-32B.",
+   "sources": [
+    "sF",
+    "sF.1",
+    "sB.4.3"
+   ]
+  }
+ ]
+}

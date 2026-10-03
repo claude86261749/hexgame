@@ -1,0 +1,955 @@
+[
+ {
+  "id": "g1",
+  "nav": "Four-stage training pipeline",
+  "head": "From base model to reasoning flagship and distilled students",
+  "body": [
+   "DeepSeek-R1 builds on DeepSeek-V3-Base through four post-training stages, followed by distillation into smaller open models. The process pairs reinforcement learning with rejection sampling to clean readability and eliminate language mixing.",
+   "First-stage RL encourages reasoning behaviors directly from cold-start seeds. Rejection sampling then harvests 800,000 verified trajectories for large-scale supervised fine-tuning, before a secondary RL stage tunes general helpfulness and safety."
+  ],
+  "hint": "Select a step to see its inputs, method, and outputs.",
+  "sources": [
+   "s3",
+   "s3.2.1",
+   "s3.2.2",
+   "sB.3.3"
+  ],
+  "type": "pipeline",
+  "steps": [
+   {
+    "id": "cold-start",
+    "label": "Cold Start",
+    "title": "Cold-start fine-tuning",
+    "note": "A few thousand curated reasoning demonstrations are fine-tuned onto DeepSeek-V3-Base. This primes the model with readable, conversational chain-of-thought structures.",
+    "sources": [
+     "s3",
+     "sB.3.2"
+    ],
+    "detail": {
+     "kind": "flow",
+     "direction": "LR",
+     "nodes": [
+      {
+       "id": "v3-base",
+       "label": "V3-Base",
+       "sub": "671B MoE base checkpoint",
+       "kind": "input",
+       "note": "DeepSeek-V3-Base serves as the foundation for post-training.",
+       "sources": [
+        "s3",
+        "sA.1"
+       ]
+      },
+      {
+       "id": "few-k-sft",
+       "label": "Few-k SFT",
+       "sub": "curated CoT examples",
+       "kind": "default",
+       "note": "Small collection of human-readable, conversational reasoning traces.",
+       "sources": [
+        "s3",
+        "sB.3.2"
+       ]
+      },
+      {
+       "id": "r1-dev1",
+       "label": "R1-Dev1",
+       "sub": "cold-start checkpoint",
+       "kind": "accent",
+       "note": "Intermediate model checkpoint ready for reinforcement learning.",
+       "sources": [
+        "s3",
+        "s3.2.2"
+       ]
+      }
+     ],
+     "edges": [
+      {
+       "from": "v3-base",
+       "to": "few-k-sft"
+      },
+      {
+       "from": "few-k-sft",
+       "to": "r1-dev1"
+      }
+     ]
+    }
+   },
+   {
+    "id": "reasoning-rl",
+    "label": "Reasoning RL",
+    "title": "Reasoning RL and language rules",
+    "note": "GRPO trains R1-Dev1 on math, code, and logic tasks using rule-based rewards. A language consistency reward penalizes traces that mix English and Chinese.",
+    "sources": [
+     "s3.2.1",
+     "sB.6"
+    ],
+    "detail": {
+     "kind": "bullets",
+     "items": [
+      "Group Relative Policy Optimization (GRPO) without a critic model",
+      "Rule-based outcome verifiers for math and coding correctness",
+      "Language consistency reward penalizing mixed-language outputs",
+      "Rollout temperature set to 1.0 with 16 samples per prompt"
+     ]
+    }
+   },
+   {
+    "id": "rejection-sft",
+    "label": "800k SFT",
+    "title": "Rejection sampling and general SFT",
+    "note": "The team samples reasoning trajectories from R1-Dev2, filtering out chaotic traces. They merge 600,000 verified reasoning paths with 200,000 general non-reasoning tasks.",
+    "sources": [
+     "s3",
+     "sB.3.3"
+    ],
+    "detail": {
+     "kind": "compare",
+     "columns": [
+      "Domain",
+      "Samples",
+      "Format"
+     ],
+     "rows": [
+      {
+       "id": "row-math",
+       "label": "Math",
+       "cells": [
+        "395,285",
+        "Verified with rules / DeepSeek-V3"
+       ],
+       "note": "Covers competitive math problems spanning diverse difficulty levels."
+      },
+      {
+       "id": "row-code",
+       "label": "Code",
+       "cells": [
+        "211,129",
+        "Algorithmic tests & engineering"
+       ],
+       "note": "Includes algorithmic challenges, debugging, and web development."
+      },
+      {
+       "id": "row-stem",
+       "label": "STEM & Logic",
+       "cells": [
+        "20,519",
+        "Textbook & competition queries"
+       ],
+       "note": "Sourced from public textbooks and reasoning collections."
+      },
+      {
+       "id": "row-gen",
+       "label": "General QA",
+       "cells": [
+        "177,812",
+        "Writing, factual QA, conversation"
+       ],
+       "note": "Reused from DeepSeek-V3; simpler prompts omit thinking traces."
+      }
+     ]
+    }
+   },
+   {
+    "id": "preference-rl",
+    "label": "General RL",
+    "title": "Secondary RL for alignment and safety",
+    "note": "A second RL pass trains the model for 1,700 steps at temperature 0.7. Helpful and safety reward models are introduced in the final 400 steps alongside rule verifiers.",
+    "sources": [
+     "s3.1",
+     "s3.2.2"
+    ],
+    "detail": {
+     "kind": "bullets",
+     "items": [
+      "Combined reward: reasoning rules + format + helpfulness + safety",
+      "Helpful reward model assesses the final user-facing summary",
+      "Safety reward model evaluates both thinking CoT and final summary",
+      "Produces the final DeepSeek-R1 671B production checkpoint"
+     ]
+    }
+   },
+   {
+    "id": "distill",
+    "label": "Distill",
+    "title": "Distillation into open models",
+    "note": "The curated 800,000 supervised trajectories are fine-tuned directly onto smaller Qwen and Llama base models, without additional reinforcement learning.",
+    "sources": [
+     "sF",
+     "sF.1"
+    ],
+    "detail": {
+     "kind": "flow",
+     "direction": "LR",
+     "nodes": [
+      {
+       "id": "curated-800k",
+       "label": "800k Dataset",
+       "sub": "R1 reasoning traces",
+       "kind": "input",
+       "note": "The 800,000 reasoning and general trajectories curated from DeepSeek-R1.",
+       "sources": [
+        "sB.3.3",
+        "sF"
+       ]
+      },
+      {
+       "id": "sft-only",
+       "label": "Supervised SFT",
+       "sub": "2-3 epochs, no RL",
+       "kind": "default",
+       "note": "Standard supervised fine-tuning applied to smaller open foundation models.",
+       "sources": [
+        "sF",
+        "sB.4.3"
+       ]
+      },
+      {
+       "id": "student-models",
+       "label": "Distilled Models",
+       "sub": "Qwen & Llama 1.5B-70B",
+       "kind": "accent",
+       "note": "Dense reasoning models including Qwen-1.5B, 7B, 14B, 32B, and Llama-8B, 70B.",
+       "sources": [
+        "sF"
+       ]
+      }
+     ],
+     "edges": [
+      {
+       "from": "curated-800k",
+       "to": "sft-only"
+      },
+      {
+       "from": "sft-only",
+       "to": "student-models"
+      }
+     ]
+    }
+   }
+  ],
+  "phases": [
+   {
+    "label": "large model post-training",
+    "from": "cold-start",
+    "to": "preference-rl"
+   },
+   {
+    "label": "student transfer",
+    "from": "distill",
+    "to": "distill"
+   }
+  ]
+ },
+ {
+  "id": "g2",
+  "nav": "GRPO reward and update flow",
+  "head": "GRPO trains reasoning without a separate critic network",
+  "body": [
+   "Standard policy gradient methods such as PPO maintain a separate critic model of comparable size to compute baselines. This adds substantial GPU memory overhead and requires intermediate value predictions on long reasoning chains.",
+   "Group Relative Policy Optimization avoids the critic entirely. For each prompt, the old policy generates a group of outputs. Rule-based checks score each response, and advantage values are computed directly from the group mean and standard deviation.",
+   "The policy updates using a clipped objective regularised by KL divergence against a reference policy. This setup eliminates critic training overhead while supporting trajectories up to 65,536 tokens."
+  ],
+  "hint": "Select any step to view how outputs are evaluated and updated.",
+  "sources": [
+   "s2.1",
+   "s2.2",
+   "sA.3"
+  ],
+  "type": "flow",
+  "direction": "TB",
+  "nodes": [
+   {
+    "id": "prompt",
+    "label": "Prompt",
+    "sub": "reasoning task",
+    "kind": "input",
+    "note": "A batch contains 32 unique questions sampled during each rollout step.",
+    "sources": [
+     "s2.1"
+    ]
+   },
+   {
+    "id": "sampling",
+    "label": "Old Policy Rollout",
+    "sub": "sample G outputs",
+    "kind": "default",
+    "note": "The policy generates a group of G candidate outputs (G = 16 for DeepSeek-R1-Zero) for each prompt at temperature 1.",
+    "sources": [
+     "s2.1",
+     "sA.3"
+    ]
+   },
+   {
+    "id": "accuracy",
+    "label": "Accuracy check",
+    "sub": "compiler & boxed math",
+    "kind": "default",
+    "note": "Deterministic verification evaluates math box answers or runs code responses against unit test suites.",
+    "sources": [
+     "s2.2"
+    ]
+   },
+   {
+    "id": "format",
+    "label": "Format check",
+    "sub": "think tags",
+    "kind": "default",
+    "note": "A reward checks whether the reasoning steps and final response are enclosed within explicit designated tags.",
+    "sources": [
+     "s2.2"
+    ]
+   },
+   {
+    "id": "rewards",
+    "label": "Rule-based rewards",
+    "sub": "r_i = r_acc + r_format",
+    "kind": "accent",
+    "note": "Accuracy and format rewards are summed with equal weight. No neural reward model is used for reasoning tasks.",
+    "sources": [
+     "s2.2"
+    ]
+   },
+   {
+    "id": "advantage",
+    "label": "Group normalization",
+    "sub": "baseline via mean & std",
+    "kind": "accent",
+    "note": "Advantages are calculated by normalizing each reward score against the mean and standard deviation of its group of G outputs. No critic network is needed.",
+    "sources": [
+     "s2.1",
+     "sA.3"
+    ]
+   },
+   {
+    "id": "ref_model",
+    "label": "Reference policy",
+    "sub": "updated every 400 steps",
+    "kind": "muted",
+    "note": "The reference model provides an unbiased KL divergence penalty in the loss. It is refreshed with the latest policy every 400 steps.",
+    "sources": [
+     "s2.1",
+     "sA.3"
+    ]
+   },
+   {
+    "id": "update",
+    "label": "Policy update",
+    "sub": "clipped surrogate loss",
+    "kind": "output",
+    "note": "The policy optimizes the clipped surrogate objective with advantage A_i minus the KL penalty over 1 inner epoch.",
+    "sources": [
+     "s2.1",
+     "sA.3"
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "from": "prompt",
+    "to": "sampling"
+   },
+   {
+    "from": "sampling",
+    "to": "accuracy",
+    "label": "outputs {o_i}"
+   },
+   {
+    "from": "sampling",
+    "to": "format"
+   },
+   {
+    "from": "accuracy",
+    "to": "rewards"
+   },
+   {
+    "from": "format",
+    "to": "rewards"
+   },
+   {
+    "from": "rewards",
+    "to": "advantage",
+    "label": "scores {r_i}"
+   },
+   {
+    "from": "advantage",
+    "to": "update",
+    "label": "advantage A_i"
+   },
+   {
+    "from": "ref_model",
+    "to": "update",
+    "label": "KL penalty",
+    "dashed": true
+   }
+  ],
+  "groups": [
+   {
+    "id": "scoring",
+    "label": "Outcome scoring",
+    "nodes": [
+     "accuracy",
+     "format",
+     "rewards"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g3",
+  "nav": "Reasoning dynamics during RL",
+  "head": "Reinforcement learning expands thinking length and accuracy together",
+  "body": [
+   "During pure reinforcement learning on DeepSeek-R1-Zero, the model learns to allocate more computation time to difficult questions without human demonstrations. Average response length expands from under 1,000 tokens to over 8,000 tokens as training proceeds.",
+   "Benchmark accuracy rises alongside output length. Pass@1 on AIME 2024 grows from 15.6% to 77.9%. Intermediate checkpoints develop reflective reasoning patterns, including spontaneous self-checking and backtracking."
+  ],
+  "hint": "Move across the chart to trace how reasoning length and accuracy evolve across training.",
+  "caveat": "Curve shapes are schematic representations of training dynamics from Figure 1 and Appendix C.",
+  "sources": [
+   "s2.3",
+   "sC.1",
+   "sC.2",
+   "sE.4"
+  ],
+  "type": "chart",
+  "xLabel": "Training steps",
+  "yLabel": "Relative scale (0 to 1)",
+  "series": [
+   {
+    "id": "aime-acc",
+    "label": "AIME 2024 Pass@1",
+    "shape": "saturate",
+    "accent": true,
+    "note": "AIME 2024 Pass@1 accuracy climbs from an initial 15.6% to 77.9% at convergence, outperforming the average human competitor.",
+    "sources": [
+     "s2.3"
+    ]
+   },
+   {
+    "id": "token-length",
+    "label": "Response token length",
+    "shape": "rise",
+    "note": "Average response length expands steadily from hundreds of tokens up to thousands of tokens as the policy searches and verifies solutions.",
+    "sources": [
+     "s2.3",
+     "sE.4"
+    ]
+   }
+  ],
+  "xTicks": [
+   {
+    "x": 0,
+    "label": "0"
+   },
+   {
+    "x": 0.45,
+    "label": "4k-7k"
+   },
+   {
+    "x": 0.75,
+    "label": "8k+"
+   },
+   {
+    "x": 1,
+    "label": "Final"
+   }
+  ],
+  "annotations": [
+   {
+    "id": "aha-moment",
+    "x": 0.55,
+    "label": "Aha moment (wait)",
+    "note": "Intermediate checkpoints begin generating reflective terms like 'wait', rethinking earlier steps when an approach fails."
+   },
+   {
+    "id": "convergence",
+    "x": 0.95,
+    "label": "77.9% Pass@1",
+    "note": "At convergence, the model averages over 8,000 thinking tokens and reaches 77.9% Pass@1 on AIME 2024."
+   }
+  ],
+  "states": [
+   {
+    "from": 0,
+    "to": 0.35,
+    "text": "Initial policy produces short chains of thought. Easy MATH problems are mastered early, but AIME accuracy starts low at 15.6%."
+   },
+   {
+    "from": 0.35,
+    "to": 0.7,
+    "text": "Thinking length grows. Frequency of reflective words rises 5- to 7-fold, and the model exhibits backtracking behaviors."
+   },
+   {
+    "from": 0.7,
+    "to": 1,
+    "text": "Reflective patterns stabilize. Extended test-time reasoning reaches 77.9% Pass@1 on AIME 2024, expanding up to 86.7% with consensus voting."
+   }
+  ],
+  "schematic": true
+ },
+ {
+  "id": "g4",
+  "nav": "DeepSeek-R1-Zero vs R1",
+  "head": "Cold-start SFT and preference tuning fix readability",
+  "body": [
+   "DeepSeek-R1-Zero proves pure reinforcement learning can discover reasoning behaviors such as self-verification and backtracking directly from a base checkpoint. However, it suffers from severe language mixing and poor readability.",
+   "DeepSeek-R1 resolves these flaws by introducing a cold-start fine-tuning step, language consistency rewards, rejection sampling, and reward models for helpfulness and safety, while matching or slightly exceeding R1-Zero's benchmark performance."
+  ],
+  "hint": "Select any row to view details on the implementation differences.",
+  "sources": [
+   "s2.3",
+   "s3",
+   "s3.1",
+   "sB.6"
+  ],
+  "type": "compare",
+  "columns": [
+   "DeepSeek-R1-Zero",
+   "DeepSeek-R1"
+  ],
+  "rows": [
+   {
+    "id": "starting-point",
+    "label": "Starting point",
+    "cells": [
+     "Raw base model",
+     "Cold-start SFT"
+    ],
+    "mark": true,
+    "note": "R1-Zero trains directly on DeepSeek-V3-Base without any demonstration data. R1 begins with a small curated dataset of human-readable reasoning traces."
+   },
+   {
+    "id": "training-pipeline",
+    "label": "Training pipeline",
+    "cells": [
+     "Single RL stage",
+     "Multi-stage RL + SFT"
+    ],
+    "mark": false,
+    "note": "R1-Zero relies exclusively on GRPO policy updates. R1 alternates between RL, rejection sampling SFT, and a secondary preference RL stage."
+   },
+   {
+    "id": "reward-signals",
+    "label": "Reward signals",
+    "cells": [
+     "Rule-based only",
+     "Rule, language & RM"
+    ],
+    "mark": true,
+    "note": "R1-Zero scores only accuracy and format. R1 combines rule-based rewards with a language consistency ratio and neural reward models for helpfulness and safety."
+   },
+   {
+    "id": "language-mixing",
+    "label": "Language mixing",
+    "cells": [
+     "Severe mixing",
+     "Consistent target language"
+    ],
+    "mark": true,
+    "note": "Because the base model is multilingual, R1-Zero frequently mixes languages during reasoning. R1 adds an explicit language consistency reward to penalize mixed tokens."
+   },
+   {
+    "id": "trace-readability",
+    "label": "Trace readability",
+    "cells": [
+     "Unstructured thinking",
+     "Clean tags & summary"
+    ],
+    "mark": false,
+    "note": "R1-Zero produces raw thought flows and only outputs the final answer in its summary. R1 refines the thinking process into a conversational style and provides detailed, readable solutions."
+   },
+   {
+    "id": "aime-accuracy",
+    "label": "AIME 2024 pass@1",
+    "cells": [
+     "77.9%",
+     "79.8%"
+    ],
+    "mark": false,
+    "note": "R1-Zero jumped from 15.6% to 77.9% during training. DeepSeek-R1 reaches 79.8% while providing human-aligned writing and format compliance."
+   }
+  ]
+ },
+ {
+  "id": "g5",
+  "nav": "Distillation vs direct RL",
+  "head": "Distillation from R1 outperforms direct RL on smaller base models",
+  "body": [
+   "Applying pure reinforcement learning directly to a smaller base model induces reasoning, but supervised distillation from DeepSeek-R1 achieves substantially higher scores across every benchmark.",
+   "For Qwen-32B, distilling 800,000 reasoning traces beats 10,000 steps of direct RL by 25.6 percentage points on AIME 2024. For 7B models, distilled supervised fine-tuning similarly surpasses pure RL."
+  ],
+  "hint": "Select a row to see model details and benchmark comparisons.",
+  "sources": [
+   "sF",
+   "sF.1",
+   "sB.4.3"
+  ],
+  "type": "compare",
+  "columns": [
+   "Direct RL",
+   "R1 Distillation",
+   "Advantage"
+  ],
+  "rows": [
+   {
+    "id": "qwen32b-aime",
+    "label": "32B: AIME 2024 (pass@1)",
+    "cells": [
+     "47.0%",
+     "72.6%",
+     "+25.6%"
+    ],
+    "mark": true,
+    "note": "Qwen2.5-32B-Zero trained with direct RL for over 10K steps reaches 47.0%, while fine-tuning on R1 trajectories reaches 72.6%."
+   },
+   {
+    "id": "qwen32b-math",
+    "label": "32B: MATH-500 (pass@1)",
+    "cells": [
+     "91.6%",
+     "94.3%",
+     "+2.7%"
+    ],
+    "note": "Both approaches reach strong scores on MATH-500, but distillation retains an edge over direct RL without needing online exploration."
+   },
+   {
+    "id": "qwen32b-gpqa",
+    "label": "32B: GPQA Diamond",
+    "cells": [
+     "55.0%",
+     "62.1%",
+     "+7.1%"
+    ],
+    "note": "Distillation transfers graduate-level scientific question-answering capabilities discovered by the larger 671B model during RL."
+   },
+   {
+    "id": "qwen32b-livecode",
+    "label": "32B: LiveCodeBench",
+    "cells": [
+     "40.2%",
+     "57.2%",
+     "+17.0%"
+    ],
+    "mark": true,
+    "note": "Code synthesis shows a 17.0 percentage point gain with distillation over direct RL on the same 32B base model."
+   },
+   {
+    "id": "qwen7b-aime24",
+    "label": "7B: AIME 2024 (pass@1)",
+    "cells": [
+     "22.3%",
+     "55.5%",
+     "+33.2%"
+    ],
+    "mark": true,
+    "note": "Direct RL on Qwen2-Math-7B reaches 22.3% on AIME 2024. In contrast, distilling R1 into Qwen2.5-Math-7B achieves 55.5%."
+   },
+   {
+    "id": "recipe",
+    "label": "Training recipe",
+    "cells": [
+     ">10K RL steps",
+     "2-3 SFT epochs",
+     "No online RL"
+    ],
+    "note": "Direct RL requires heavy compute and reward verifiers. Distilled models rely strictly on supervised fine-tuning over 800,000 samples."
+   }
+  ]
+ },
+ {
+  "id": "map",
+  "type": "landscape",
+  "nav": "Around it",
+  "head": "Around DeepSeek-R1 on the map",
+  "body": [
+   "DeepSeek-R1 sits among the papers it builds on, reuses, measures itself against, and feeds. Colour shows how each relates; height shows how much DeepSeek-R1 leans on it. Hatched tiles are directions the paper leaves open."
+  ],
+  "hint": "Select a tile.",
+  "sources": [],
+  "center": {
+   "label": "DeepSeek-R1"
+  },
+  "tiles": [
+   {
+    "id": "deepseekv3",
+    "label": "DeepSeek-V3",
+    "year": "2024",
+    "title": "DeepSeek-V3 Technical Report",
+    "authors": "DeepSeek-AI",
+    "venue": "arXiv preprint",
+    "arxiv": "2412.19437",
+    "relation": "lineage",
+    "weight": 3,
+    "link": "DeepSeek-V3 provides the 671B mixture-of-experts base model that DeepSeek-R1 trains on. It also provides the general supervised dataset and the model used for judging and rewriting.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Mixture-of-experts base architecture with 37B active parameters",
+     "Pre-training weights and multi-token prediction components",
+     "General instruction-following data pipeline"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Added rule-based reinforcement learning before supervised tuning",
+     "Added explicit chain-of-thought tags for intermediate reasoning",
+     "Trained for extended test-time thinking traces"
+    ]
+   },
+   {
+    "id": "grpo",
+    "label": "GRPO",
+    "year": "2024",
+    "title": "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models",
+    "authors": "Shao et al.",
+    "venue": "arXiv preprint",
+    "arxiv": "2402.03300",
+    "relation": "component",
+    "weight": 3,
+    "link": "GRPO defines the reinforcement learning algorithm used across both training phases of DeepSeek-R1. It replaces the critic model in standard policy gradient methods with group-normalized scores.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Group relative advantage estimation without a critic model",
+     "Clipped surrogate objective with reference policy divergence",
+     "Rule-based reward evaluation for verifiable math"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Scaled context length to 65,536 tokens during training",
+     "Added a language consistency reward component",
+     "Applied directly to a base model without prior SFT"
+    ]
+   },
+   {
+    "id": "ppo",
+    "label": "PPO",
+    "year": "2017",
+    "title": "Proximal Policy Optimization Algorithms",
+    "authors": "Schulman et al.",
+    "venue": "arXiv preprint",
+    "arxiv": "1707.06347",
+    "relation": "compare",
+    "weight": 2,
+    "link": "PPO is the standard policy optimization algorithm in language model alignment. DeepSeek-R1 compares against it to demonstrate the memory and compute benefits of omitting the value model.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Clipped probability ratio objective to constrain policy drift",
+     "Optimization using multiple rollout generations per prompt"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "PPO trains a separate value network equal to policy size",
+     "PPO penalizes per-token KL divergence in the reward",
+     "GRPO computes advantage from group reward statistics"
+    ]
+   },
+   {
+    "id": "instructgpt",
+    "label": "InstructGPT",
+    "year": "2022",
+    "title": "Training language models to follow instructions with human feedback",
+    "authors": "Ouyang et al.",
+    "venue": "NeurIPS",
+    "arxiv": "2203.02155",
+    "relation": "lineage",
+    "weight": 2,
+    "link": "InstructGPT established the standard post-training pipeline of supervised fine-tuning followed by reinforcement learning from human feedback. DeepSeek-R1 inverts this order for reasoning.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Pairwise preference reward modeling for general queries",
+     "Post-training alignment for helpfulness and safety"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Eliminated supervised fine-tuning prior to initial RL",
+     "Replaced human preference rewards with rule checks for reasoning",
+     "Optimized for extended reasoning traces rather than concise text"
+    ]
+   },
+   {
+    "id": "cot",
+    "label": "Chain of Thought",
+    "year": "2022",
+    "title": "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
+    "authors": "Wei et al.",
+    "venue": "NeurIPS",
+    "arxiv": "2201.11903",
+    "relation": "lineage",
+    "weight": 2,
+    "link": "Chain-of-thought prompting showed that generating intermediate tokens improves problem solving. DeepSeek-R1 automates the discovery of these intermediate trajectories via reinforcement learning.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Step-by-step token generation preceding final answers",
+     "Inference-time compute scaling through intermediate tokens"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Eliminated few-shot human reasoning demonstrations",
+     "Autonomous emergence of self-reflection and verification",
+     "Scaling token chains up to tens of thousands of tokens"
+    ]
+   },
+   {
+    "id": "prm",
+    "label": "Process Supervision",
+    "year": "2024",
+    "title": "Let's Verify Step by Step",
+    "authors": "Lightman et al.",
+    "venue": "ICLR",
+    "arxiv": "2305.20050",
+    "relation": "compare",
+    "weight": 2,
+    "link": "Process reward models assign credit to each intermediate reasoning step. DeepSeek-R1 tested this approach but abandoned it because of reward hacking and step annotation difficulty.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Intermediate reasoning verification improves problem accuracy",
+     "Mathematics problems provide measurable evaluation targets"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "Process models evaluate every individual intermediate step",
+     "DeepSeek-R1 uses outcome-only rule checks on final answers",
+     "DeepSeek-R1 avoids training an intermediate neural verifier"
+    ]
+   },
+   {
+    "id": "mcts",
+    "label": "AlphaGo / MCTS",
+    "year": "2017",
+    "title": "Mastering the game of Go with deep neural networks and tree search",
+    "authors": "Silver et al.",
+    "venue": "Nature",
+    "relation": "compare",
+    "weight": 1,
+    "link": "Monte Carlo Tree Search guided by value networks achieved self-play improvements in board games. DeepSeek-R1 evaluated MCTS for token search but found the search space too large.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Outcome feedback guides autonomous strategy improvement",
+     "Test-time compute search improves complex decision making"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "MCTS searches discrete token branches with a value network",
+     "DeepSeek-R1 samples continuous reasoning chains directly",
+     "DeepSeek-R1 eliminates step-level value function estimation"
+    ]
+   },
+   {
+    "id": "star",
+    "label": "STaR",
+    "year": "2022",
+    "title": "STaR: Bootstrapping Reasoning With Reasoning",
+    "authors": "Zelikman et al.",
+    "venue": "NeurIPS",
+    "arxiv": "2203.14465",
+    "relation": "lineage",
+    "weight": 2,
+    "link": "STaR iteratively bootstraps reasoning by fine-tuning a model on its own successful solution paths. DeepSeek-R1 adopts a similar rejection sampling principle in its SFT phase.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Filtering self-generated traces by final answer correctness",
+     "Supervised fine-tuning on correct reasoning trajectories"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Combines rejection sampling with full policy gradient RL",
+     "Applies rule verification on coding and STEM problems",
+     "Distills outputs into independent student model architectures"
+    ]
+   },
+   {
+    "id": "distill",
+    "label": "Model Distillation",
+    "year": "2015",
+    "title": "Distilling the Knowledge in a Neural Network",
+    "authors": "Hinton et al.",
+    "venue": "NeurIPS Workshop",
+    "arxiv": "1503.02531",
+    "relation": "component",
+    "weight": 2,
+    "link": "Distillation transfers knowledge from larger teacher models to smaller student models. DeepSeek-R1 uses 800,000 teacher trajectories to train smaller Qwen and Llama checkpoints.",
+    "carriedHeading": "Carried into DeepSeek-R1",
+    "carried": [
+     "Supervised training of student networks on teacher outputs",
+     "Preservation of reasoning capabilities in smaller architectures"
+    ],
+    "changedHeading": "Changed in DeepSeek-R1",
+    "changed": [
+     "Distills explicit multi-step reasoning traces rather than logits",
+     "Applies supervised fine-tuning alone without student RL",
+     "Targets competitive mathematics and software tasks"
+    ]
+   },
+   {
+    "id": "qwq",
+    "label": "QwQ-32B",
+    "year": "2024",
+    "title": "QwQ: Reflect Deeply on the Boundaries of the Unknown",
+    "authors": "Qwen Team",
+    "venue": "Blog post",
+    "relation": "compare",
+    "weight": 1,
+    "link": "QwQ-32B is an open reasoning baseline. DeepSeek-R1 compares its distilled 32B model and pure RL 32B model directly against QwQ on reasoning benchmarks.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Open release of long chain-of-thought model weights",
+     "Focus on competitive coding and mathematics benchmarks"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "DeepSeek-R1-Distill-32B uses supervised distillation from 671B",
+     "DeepSeek-R1-Distill-32B scores 72.6% on AIME 2024 versus 50.0%",
+     "DeepSeek documents the exact multi-stage training recipe"
+    ]
+   }
+  ],
+  "open": [
+   {
+    "id": "tool_use",
+    "label": "Tool-Integrated RL",
+    "title": "Embedding external code execution and search directly into policy training",
+    "shows": "DeepSeek-R1 operates without external tools, relying entirely on internal token generation for arithmetic, retrieval, and code validation.",
+    "open": "The paper does not test whether adding tool calling actions into group policy optimization disrupts the emergence of internal self-reflection.",
+    "move": "Add python interpreter tags into the GRPO action space on math tasks that exceed 64-bit integer precision and compare reasoning length.",
+    "from": [
+     "deepseekv3",
+     "grpo"
+    ]
+   },
+   {
+    "id": "token_budget",
+    "label": "Adaptive Token Budgets",
+    "title": "Controlling token waste on simple tasks without degrading hard problem solving",
+    "shows": "DeepSeek-R1 scales test-time compute dynamically with task complexity, but overthinks simpler questions like basic arithmetic.",
+    "open": "It remains untested whether an explicit token budget reward penalty can curb verbosity on simple inputs without suppressing reflection on hard inputs.",
+    "move": "Train a checkpoint with an added reward penalty proportional to generated tokens for inputs classified below a difficulty threshold.",
+    "from": [
+     "grpo",
+     "cot"
+    ]
+   },
+   {
+    "id": "step_verification",
+    "label": "Hybrid Verifier Signals",
+    "title": "Combining outcome verification with formal automated intermediate checks",
+    "shows": "Neural process reward models suffered from reward hacking, forcing the authors to rely exclusively on final outcome rewards.",
+    "open": "Whether formal deterministic step checkers, such as interactive theorem prover steps, avoid the hacking observed in learned reward models.",
+    "move": "Evaluate GRPO using formal Lean theorem proving environments where intermediate proof steps provide deterministic binary feedback.",
+    "from": [
+     "prm",
+     "grpo"
+    ]
+   },
+   {
+    "id": "small_base_rl",
+    "label": "Small Model Direct RL",
+    "title": "Inducing long chain-of-thought behaviors directly in sub-10B base checkpoints",
+    "shows": "Direct RL from scratch succeeded on 32B dense and 671B MoE base models, but failed on 7B dense and 16B MoE models due to repetitive loops.",
+    "open": "The authors do not isolate whether failure in small models is caused by pre-training token volume, architecture width, or lack of reasoning traces.",
+    "move": "Test GRPO on 7B models pre-trained with varying proportions of synthetic code-execution data to identify the threshold for RL emergence.",
+    "from": [
+     "distill",
+     "deepseekv3"
+    ]
+   }
+  ]
+ }
+]

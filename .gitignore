@@ -1,0 +1,7 @@
+node_modules/
+dist/
+scratch/
+.env
+data/cache/
+data/logs/
+data/eval/

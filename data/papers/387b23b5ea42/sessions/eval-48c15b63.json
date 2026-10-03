@@ -1,0 +1,378 @@
+{
+ "id": "eval-48c15b63",
+ "paperId": "387b23b5ea42",
+ "startedAt": "2026-10-03T14:19:51.210Z",
+ "duration": 26.811353383999997,
+ "events": [
+  {
+   "t": 0.8401553540000001,
+   "kind": "guide",
+   "text": "I'm here to guide "
+  },
+  {
+   "t": 1.1717635460000002,
+   "kind": "guide",
+   "text": "you through the DINOv3"
+  },
+  {
+   "t": 1.370138719,
+   "kind": "guide",
+   "text": " paper, which scales"
+  },
+  {
+   "t": 1.618148862,
+   "kind": "guide",
+   "text": " self-supervised"
+  },
+  {
+   "t": 1.8534964879999998,
+   "kind": "guide",
+   "text": " pre-training to a 7B"
+  },
+  {
+   "t": 2.052733805,
+   "kind": "guide",
+   "text": " parameter vision"
+  },
+  {
+   "t": 2.3403984639999997,
+   "kind": "guide",
+   "text": " transformer. What would"
+  },
+  {
+   "t": 2.566374534,
+   "kind": "guide",
+   "text": " you like to understand about"
+  },
+  {
+   "t": 2.76559141,
+   "kind": "guide",
+   "text": " it?"
+  },
+  {
+   "t": 8.164184684,
+   "kind": "you",
+   "text": "How is it different from DINOv2?"
+  },
+  {
+   "t": 8.208346046,
+   "kind": "turn"
+  },
+  {
+   "t": 9.108782349,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "How is DINOv3 different from DINOv2?",
+    "base": "g5",
+    "nav": "DINOv3 vs. DINOv2",
+    "head": "Scaling up to 7B parameters with Gram anchoring for dense feature consistency"
+   },
+   "result": {
+    "custom_id": "c1",
+    "targets": [
+     "params",
+     "supervision",
+     "ade20k",
+     "depth",
+     "davis",
+     "in1k",
+     "coco"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 9.125245337,
+   "kind": "turn"
+  },
+  {
+   "t": 9.697918819,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "note",
+      "target": "params",
+      "text": "DINOv3 scales the architecture from 1.1B in DINOv2 to 6.7B parameters."
+     },
+     {
+      "op": "note",
+      "target": "ade20k",
+      "text": "It improves ADE20k dense linear probing significantly, reaching 55.9 mIoU."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 9.711822876,
+   "kind": "turn"
+  },
+  {
+   "t": 10.659338132,
+   "kind": "guide",
+   "text": "DINOv3 scales the "
+  },
+  {
+   "t": 10.903230084,
+   "kind": "guide",
+   "text": "architecture from"
+  },
+  {
+   "t": 11.151257948,
+   "kind": "guide",
+   "text": " 1.1 billion"
+  },
+  {
+   "t": 11.387020804,
+   "kind": "guide",
+   "text": " in DINOv2 to 6.7"
+  },
+  {
+   "t": 11.586553344,
+   "kind": "guide",
+   "text": " billion"
+  },
+  {
+   "t": 11.846996219000001,
+   "kind": "guide",
+   "text": " parameters, while"
+  },
+  {
+   "t": 12.040308978999999,
+   "kind": "guide",
+   "text": " significantly"
+  },
+  {
+   "t": 12.327075464,
+   "kind": "guide",
+   "text": " improving dense feature"
+  },
+  {
+   "t": 12.553907426,
+   "kind": "guide",
+   "text": " maps for tasks"
+  },
+  {
+   "t": 12.81091805,
+   "kind": "guide",
+   "text": " like segmentation."
+  },
+  {
+   "t": 13.134548288,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "note",
+      "target": "davis",
+      "text": "On DAVIS video segmentation tracking, it reaches 83.3, which is 6.7 points above DINOv2."
+     },
+     {
+      "op": "note",
+      "target": "in1k",
+      "text": "ImageNet-1k linear top-1 accuracy improves to 88.4%."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 2
+   }
+  },
+  {
+   "t": 17.717670496,
+   "kind": "you",
+   "text": "Why did they need Gram anchoring at all?"
+  },
+  {
+   "t": 17.760859990999997,
+   "kind": "turn"
+  },
+  {
+   "t": 18.359843458,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "Why did they need Gram anchoring at all?",
+    "base": "g2",
+    "nav": "Need for Gram Anchoring",
+    "head": "Gram anchoring fixes dense feature degradation during long training runs"
+   },
+   "result": {
+    "custom_id": "c2",
+    "targets": [
+     "global_cls",
+     "dense_seg",
+     "dense_peak",
+     "plot"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 18.379856509999996,
+   "kind": "turn"
+  },
+  {
+   "t": 18.788543297,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c2",
+    "ops": [
+     {
+      "op": "note",
+      "target": "dense_seg",
+      "text": "Dense patch features degrade during long training runs, losing spatial precision."
+     },
+     {
+      "op": "note",
+      "target": "global_cls",
+      "text": "Meanwhile, global classification accuracy continues to rise."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 18.804655148,
+   "kind": "turn"
+  },
+  {
+   "t": 19.525667717999998,
+   "kind": "guide",
+   "text": "During long training "
+  },
+  {
+   "t": 19.813196323999996,
+   "kind": "guide",
+   "text": "runs, global classification"
+  },
+  {
+   "t": 20.009822371,
+   "kind": "guide",
+   "text": " accuracy increases,"
+  },
+  {
+   "t": 20.236627499999997,
+   "kind": "guide",
+   "text": " but dense"
+  },
+  {
+   "t": 20.493412955,
+   "kind": "guide",
+   "text": " patch representations"
+  },
+  {
+   "t": 20.69691332,
+   "kind": "guide",
+   "text": " degrade"
+  },
+  {
+   "t": 20.951706638,
+   "kind": "guide",
+   "text": " and lose spatial precision."
+  },
+  {
+   "t": 21.569085612,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c2",
+    "ops": [
+     {
+      "op": "note",
+      "target": "plot",
+      "text": "Gram anchoring prevents this collapse by penalizing changes in pairwise patch similarity."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 2
+   }
+  }
+ ],
+ "customs": [
+  {
+   "id": "c1",
+   "question": "How is DINOv3 different from DINOv2?",
+   "base": "g5",
+   "nav": "DINOv3 vs. DINOv2",
+   "head": "Scaling up to 7B parameters with Gram anchoring for dense feature consistency",
+   "summary": "",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "note",
+      "target": "params",
+      "text": "DINOv3 scales the architecture from 1.1B in DINOv2 to 6.7B parameters."
+     },
+     {
+      "op": "note",
+      "target": "ade20k",
+      "text": "It improves ADE20k dense linear probing significantly, reaching 55.9 mIoU."
+     }
+    ],
+    [
+     {
+      "op": "note",
+      "target": "davis",
+      "text": "On DAVIS video segmentation tracking, it reaches 83.3, which is 6.7 points above DINOv2."
+     },
+     {
+      "op": "note",
+      "target": "in1k",
+      "text": "ImageNet-1k linear top-1 accuracy improves to 88.4%."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c2",
+   "question": "Why did they need Gram anchoring at all?",
+   "base": "g2",
+   "nav": "Need for Gram Anchoring",
+   "head": "Gram anchoring fixes dense feature degradation during long training runs",
+   "summary": "",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "note",
+      "target": "dense_seg",
+      "text": "Dense patch features degrade during long training runs, losing spatial precision."
+     },
+     {
+      "op": "note",
+      "target": "global_cls",
+      "text": "Meanwhile, global classification accuracy continues to rise."
+     }
+    ],
+    [
+     {
+      "op": "note",
+      "target": "plot",
+      "text": "Gram anchoring prevents this collapse by penalizing changes in pairwise patch similarity."
+     }
+    ]
+   ],
+   "pending": false
+  }
+ ],
+ "title": "Scripted eval session"
+}

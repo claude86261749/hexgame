@@ -1,0 +1,955 @@
+[
+ {
+  "id": "g1",
+  "nav": "Full training pipeline",
+  "head": "From 17B images to a family of distilled models",
+  "body": [
+   "DINOv3 trains a 6.7B-parameter Vision Transformer in five distinct stages: data curation, constant-schedule self-supervised pre-training, Gram anchoring refinement, resolution scaling, and multi-student distillation.",
+   "Data curation filters 17B web images into a balanced 1.689B subset. The 7B model trains on 256-pixel crops before Gram anchoring restores degraded dense features, enabling high-resolution scaling and parallel student distillation."
+  ],
+  "hint": "Select a stage to view its internal workflow and parameters.",
+  "sources": [
+   "s3.1",
+   "s3.2",
+   "s4.2",
+   "s5.1"
+  ],
+  "type": "pipeline",
+  "steps": [
+   {
+    "id": "curate",
+    "label": "Curate",
+    "title": "Data curation (LVD-1689M)",
+    "note": "A raw pool of 17B Instagram images is curated using hierarchical k-means clustering across 5 levels, balanced sampling, and retrieval against downstream seed datasets.",
+    "sources": [
+     "s3.1"
+    ],
+    "detail": {
+     "kind": "flow",
+     "direction": "LR",
+     "nodes": [
+      {
+       "id": "raw-pool",
+       "label": "17B images",
+       "sub": "Instagram pool",
+       "kind": "input",
+       "note": "Public Instagram images filtered by platform content moderation.",
+       "sources": [
+        "s3.1"
+       ]
+      },
+      {
+       "id": "kmeans",
+       "label": "Hierarchical k-means",
+       "sub": "5 levels with DINOv2",
+       "kind": "default",
+       "note": "Cluster hierarchy spanning 200M down to 25k clusters.",
+       "sources": [
+        "s3.1"
+       ]
+      },
+      {
+       "id": "curated-set",
+       "label": "1.689B images",
+       "sub": "LVD-1689M dataset",
+       "kind": "accent",
+       "note": "Balanced subset augmented with retrieval seeds and public vision datasets.",
+       "sources": [
+        "s3.1"
+       ]
+      }
+     ],
+     "edges": [
+      {
+       "from": "raw-pool",
+       "to": "kmeans"
+      },
+      {
+       "from": "kmeans",
+       "to": "curated-set"
+      }
+     ]
+    }
+   },
+   {
+    "id": "pretrain",
+    "label": "Pretrain",
+    "title": "Constant-schedule pre-training",
+    "note": "ViT-7B trains for 1M iterations at 256x256 resolution using AdamW with constant learning rate, weight decay, and momentum teacher EMA.",
+    "sources": [
+     "s3.2"
+    ],
+    "detail": {
+     "kind": "bullets",
+     "items": [
+      "Global DINO loss on 2 global crops (256x256 pixels)",
+      "Local iBOT latent patch reconstruction on 8 local crops (112x112 pixels)",
+      "Distributed KoLeo regularizer computed across batches of 16 samples",
+      "RoPE-box jittering with custom 2D position embeddings"
+     ]
+    }
+   },
+   {
+    "id": "refine",
+    "label": "Refine",
+    "title": "Gram anchoring refinement",
+    "note": "A Gram loss penalizes shifts in pairwise patch similarities relative to an early teacher checkpoint, repairing degraded local feature maps within 10k iterations.",
+    "sources": [
+     "s4.2"
+    ],
+    "detail": {
+     "kind": "matrix",
+     "panels": [
+      {
+       "id": "student-gram",
+       "label": "Student patches",
+       "size": 6,
+       "preset": "noisy-blocks",
+       "note": "Student pairwise similarity Gram matrix over global crop patches.",
+       "sources": [
+        "s4.2"
+       ]
+      },
+      {
+       "id": "teacher-gram",
+       "label": "Gram teacher",
+       "size": 6,
+       "preset": "blocks",
+       "accent": true,
+       "note": "Early teacher checkpoint acting as anchor, updated every 10k steps.",
+       "sources": [
+        "s4.2"
+       ]
+      }
+     ],
+     "links": [
+      {
+       "from": "student-gram",
+       "to": "teacher-gram",
+       "label": "Frobenius norm loss"
+      }
+     ]
+    }
+   },
+   {
+    "id": "res-scale",
+    "label": "Scale Res",
+    "title": "Resolution scaling",
+    "note": "Fine-tuning for 10k steps on mixed crop resolutions up to 768x768 pixels with continued Gram anchoring allows inference on images up to 4096x4096 pixels.",
+    "sources": [
+     "s5.1"
+    ],
+    "detail": {
+     "kind": "flow",
+     "direction": "LR",
+     "nodes": [
+      {
+       "id": "crops-mixed",
+       "label": "Mixed crops",
+       "sub": "512 to 768 px",
+       "kind": "input",
+       "note": "Global crops sampled from {512, 768} and local crops from {112, 168, 224, 336}.",
+       "sources": [
+        "s5.1"
+       ]
+      },
+      {
+       "id": "res-step",
+       "label": "10k adaptation steps",
+       "sub": "With Gram anchoring",
+       "kind": "default",
+       "note": "Uses frozen 7B teacher as the Gram anchor to keep patch features consistent.",
+       "sources": [
+        "s5.1"
+       ]
+      },
+      {
+       "id": "hires-model",
+       "label": "Multi-scale ViT-7B",
+       "sub": "Inference to 4096 px",
+       "kind": "output",
+       "note": "Evaluates cleanly at resolutions far exceeding training sizes.",
+       "sources": [
+        "s5.1"
+       ]
+      }
+     ],
+     "edges": [
+      {
+       "from": "crops-mixed",
+       "to": "res-step"
+      },
+      {
+       "from": "res-step",
+       "to": "hires-model"
+      }
+     ]
+    }
+   },
+   {
+    "id": "distill",
+    "label": "Distill",
+    "title": "Multi-student distillation",
+    "note": "The frozen 7B teacher trains smaller ViT and ConvNeXt models simultaneously by sharing one distributed teacher forward pass across student GPU groups.",
+    "sources": [
+     "s5.2"
+    ],
+    "detail": {
+     "kind": "bullets",
+     "items": [
+      "Global GPU group computes teacher inference once per batch",
+      "All-gather synchronizes teacher representations across all nodes",
+      "Individual student groups train ViT-S, ViT-B, ViT-L, ViT-H+, and ConvNeXt",
+      "1M distillation steps followed by 250k cosine cooldown"
+     ]
+    }
+   }
+  ],
+  "phases": [
+   {
+    "label": "7B teacher pre-training",
+    "from": "curate",
+    "to": "refine"
+   },
+   {
+    "label": "adaptation and distillation",
+    "from": "res-scale",
+    "to": "distill"
+   }
+  ]
+ },
+ {
+  "id": "g2",
+  "nav": "Dense feature collapse",
+  "head": "Long training improves global classes but ruins dense patch maps",
+  "body": [
+   "During long self-supervised pre-training, image-level representations continuously improve while local patch-level representations degrade. A linear probe on ImageNet-1k CLS tokens climbs monotonically from early iterations to over 88% accuracy at 1M steps.",
+   "In contrast, dense segmentation probing on frozen patch features peaks near 200k to 300k iterations and then steadily declines. Patch cosine similarity maps smear across irrelevant image regions as patch tokens align more strongly with the global CLS token.",
+   "This dense collapse motivated the Gram anchoring objective, which locks patch similarity structure to an earlier checkpoint to preserve dense fidelity."
+  ],
+  "hint": "Scrub across training iterations to observe the split between global and dense metrics.",
+  "caveat": "Curve shapes are schematic representations of trends described in Section 4.1.",
+  "sources": [
+   "s1",
+   "s4.1",
+   "s6.1.2",
+   "s6.2.1"
+  ],
+  "type": "chart",
+  "xLabel": "Training iterations",
+  "yLabel": "Probe performance (normalized)",
+  "series": [
+   {
+    "id": "global_cls",
+    "label": "ImageNet-1k probe",
+    "shape": "saturate",
+    "note": "Linear probe accuracy on ImageNet-1k using the frozen CLS token improves monotonically throughout training, rising from around 75% to 88.4%.",
+    "sources": [
+     "s4.1",
+     "s6.2.1"
+    ]
+   },
+   {
+    "id": "dense_seg",
+    "label": "Dense segmentation probe",
+    "shape": "peak-then-fall",
+    "peak": 0.25,
+    "accent": true,
+    "note": "Linear probing on frozen patch features peaks around 200k-300k iterations before declining. Irrelevant background patches gain spurious high similarity to reference patches.",
+    "sources": [
+     "s4.1",
+     "s6.1.2"
+    ]
+   }
+  ],
+  "xTicks": [
+   {
+    "x": 0,
+    "label": "0"
+   },
+   {
+    "x": 0.25,
+    "label": "250k"
+   },
+   {
+    "x": 0.5,
+    "label": "500k"
+   },
+   {
+    "x": 0.75,
+    "label": "750k"
+   },
+   {
+    "x": 1,
+    "label": "1M"
+   }
+  ],
+  "annotations": [
+   {
+    "id": "dense_peak",
+    "x": 0.25,
+    "label": "Dense peak (~250k)",
+    "note": "Patch similarity maps are sharp and well-localized. Beyond this point, dense segmentation accuracy declines without Gram regularization."
+   }
+  ],
+  "states": [
+   {
+    "from": 0,
+    "to": 0.25,
+    "text": "Both global classification and dense patch metrics improve rapidly as the model acquires visual features."
+   },
+   {
+    "from": 0.25,
+    "to": 0.6,
+    "text": "Global classification keeps rising, but dense segmentation drops as patch similarities smear across unrelated objects."
+   },
+   {
+    "from": 0.6,
+    "to": 1,
+    "text": "Global accuracy saturates near 88%, while dense patch maps remain noisy unless regularized by Gram anchoring."
+   }
+  ],
+  "schematic": true
+ },
+ {
+  "id": "g3",
+  "nav": "Gram anchoring mechanism",
+  "head": "Gram anchoring locks patch similarity without freezing features",
+  "body": [
+   "Extended training degrades dense patch representations even as global accuracy climbs. Gram anchoring penalizes drift in the pairwise cosine similarity matrix of patches against an earlier, cleaner checkpoint.",
+   "The anchor branch runs on double-resolution crops and down-samples feature maps by 2x. This injects spatial smoothness while leaving individual student patch representations free to adjust under DINO and iBOT losses."
+  ],
+  "hint": "Select any stage in either branch to view its role in the loss.",
+  "sources": [
+   "s4.2",
+   "s4.3"
+  ],
+  "type": "flow",
+  "direction": "TB",
+  "nodes": [
+   {
+    "id": "input-img",
+    "label": "Input image",
+    "sub": "global crop",
+    "kind": "input",
+    "note": "A global crop extracted during pre-training. Gram anchoring is evaluated specifically on global crops.",
+    "sources": [
+     "s4.2"
+    ]
+   },
+   {
+    "id": "student-net",
+    "label": "Active student",
+    "sub": "1x resolution ViT",
+    "kind": "accent",
+    "note": "The active student model being trained. It processes the image at normal 1x resolution to yield patch features Xs.",
+    "sources": [
+     "s4.2"
+    ]
+   },
+   {
+    "id": "student-gram",
+    "label": "Student Gram",
+    "sub": "Xs · Xs^T",
+    "kind": "default",
+    "note": "Pairwise dot-product matrix of L2-normalized student patch vectors across all P patches.",
+    "sources": [
+     "s4.2"
+    ]
+   },
+   {
+    "id": "anchor-net",
+    "label": "Gram teacher",
+    "sub": "frozen early ViT (2x res)",
+    "kind": "muted",
+    "note": "An early teacher checkpoint (such as 100k or 200k iterations) evaluated at 2x resolution to generate cleaner local representations.",
+    "sources": [
+     "s4.2",
+     "s4.3"
+    ]
+   },
+   {
+    "id": "downsample",
+    "label": "2x pooling",
+    "sub": "bicubic scale to Xg",
+    "kind": "muted",
+    "note": "Bicubic interpolation down-samples the 2x teacher feature map to match student patch dimensions, smoothing noise and sharpening local coherence.",
+    "sources": [
+     "s4.3"
+    ]
+   },
+   {
+    "id": "anchor-gram",
+    "label": "Anchor Gram",
+    "sub": "Xg · Xg^T",
+    "kind": "default",
+    "note": "Reference Gram matrix encoding pairwise patch similarities from the smoothed anchor features.",
+    "sources": [
+     "s4.2",
+     "s4.3"
+    ]
+   },
+   {
+    "id": "gram-loss",
+    "label": "Gram loss",
+    "sub": "Frobenius norm difference",
+    "kind": "accent",
+    "note": "Penalizes squared Frobenius norm difference between student and anchor Gram matrices. It preserves spatial geometry without fixing vector positions.",
+    "sources": [
+     "s4.2"
+    ]
+   },
+   {
+    "id": "total-loss",
+    "label": "Refinement loss",
+    "sub": "DINO + iBOT + Gram",
+    "kind": "output",
+    "note": "Combines Gram regularization with standard DINO, iBOT, and KoLeo losses during the refinement stage, immediately improving dense probe metrics.",
+    "sources": [
+     "s4.2",
+     "s4.3"
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "from": "input-img",
+    "to": "student-net",
+    "label": "1x crop"
+   },
+   {
+    "from": "input-img",
+    "to": "anchor-net",
+    "label": "2x crop"
+   },
+   {
+    "from": "student-net",
+    "to": "student-gram"
+   },
+   {
+    "from": "anchor-net",
+    "to": "downsample"
+   },
+   {
+    "from": "downsample",
+    "to": "anchor-gram"
+   },
+   {
+    "from": "student-gram",
+    "to": "gram-loss"
+   },
+   {
+    "from": "anchor-gram",
+    "to": "gram-loss"
+   },
+   {
+    "from": "gram-loss",
+    "to": "total-loss"
+   }
+  ]
+ },
+ {
+  "id": "g4",
+  "nav": "Multi-student distillation",
+  "head": "One teacher pass trains multiple student models",
+  "body": [
+   "Running forward passes through a 7B-parameter teacher is compute-intensive. To amortise this cost, DINOv3 executes teacher inference across all assigned GPU nodes simultaneously.",
+   "An all-gather collective shares the teacher predictions with each student group. Each sub-group trains a different architecture—such as ViT variants or ConvNeXts—matching iteration times to avoid idle GPU barriers.",
+   "The distilled models retain dense and global accuracy while reducing inference FLOPs across sizes, with ViT-H+ reducing compute by roughly 8x relative to the 7B teacher."
+  ],
+  "hint": "Select a node to inspect its role and training parameters.",
+  "sources": [
+   "s5.2",
+   "s7.1",
+   "s7.2"
+  ],
+  "type": "flow",
+  "direction": "TB",
+  "nodes": [
+   {
+    "id": "images",
+    "label": "Input batch",
+    "sub": "split across all nodes",
+    "kind": "input",
+    "note": "A batch of images partitioned across all N_T GPUs assigned across all student groups.",
+    "sources": [
+     "s5.2"
+    ]
+   },
+   {
+    "id": "teacher",
+    "label": "Frozen ViT-7B",
+    "sub": "teacher inference",
+    "kind": "accent",
+    "note": "The fixed 6.7B parameter teacher. Inference runs across the global GPU group so per-GPU teacher cost is divided across all participating nodes.",
+    "sources": [
+     "s5.2"
+    ]
+   },
+   {
+    "id": "allgather",
+    "label": "All-gather",
+    "sub": "NCCL collective sync",
+    "kind": "muted",
+    "note": "Synchronises inputs and teacher targets across all GPU sub-groups at every iteration.",
+    "sources": [
+     "s5.2"
+    ]
+   },
+   {
+    "id": "vith",
+    "label": "ViT-H+ & ViT-L",
+    "sub": "up to 840M params",
+    "kind": "output",
+    "note": "ViT-H+ reaches 90.3% on ImageNet-ReaL and 54.8 mIoU on ADE20k, matching the 7B teacher at roughly one-eighth the inference compute.",
+    "sources": [
+     "s5.2",
+     "s7.1"
+    ]
+   },
+   {
+    "id": "vitsb",
+    "label": "ViT-S, S+ & B",
+    "sub": "21M–86M params",
+    "kind": "output",
+    "note": "Standard compact architectures for edge devices. ViT-S scores 47.0 mIoU on ADE20k, outperforming DINOv2 ViT-S at 45.5 mIoU.",
+    "sources": [
+     "s5.2",
+     "s7.1"
+    ]
+   },
+   {
+    "id": "convnext",
+    "label": "ConvNeXt T–L",
+    "sub": "convolutional backbones",
+    "kind": "output",
+    "note": "Distilling ViT-7B into convolutional backbones without a CLS token. CNX-T achieves 42.7 mIoU on ADE20k compared to 24.8 for supervised ConvNeXt.",
+    "sources": [
+     "s5.2",
+     "s7.2"
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "from": "images",
+    "to": "teacher"
+   },
+   {
+    "from": "teacher",
+    "to": "allgather"
+   },
+   {
+    "from": "allgather",
+    "to": "vith",
+    "label": "group 1"
+   },
+   {
+    "from": "allgather",
+    "to": "vitsb",
+    "label": "group 2"
+   },
+   {
+    "from": "allgather",
+    "to": "convnext",
+    "label": "group 3"
+   }
+  ],
+  "groups": [
+   {
+    "id": "students",
+    "label": "Parallel student GPU groups",
+    "nodes": [
+     "vith",
+     "vitsb",
+     "convnext"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g5",
+  "nav": "DINOv3 vs prior models",
+  "head": "Frozen DINOv3 beats supervised and self-supervised predecessors",
+  "body": [
+   "DINOv3 achieves competitive or higher accuracy on both dense and global benchmarks without supervised pre-training or backbone fine-tuning.",
+   "Web-DINO previously attempted to scale DINOv2 to 7B parameters but suffered dense feature collapse. Gram anchoring allows DINOv3 to gain 13.2 mIoU over Web-DINO on ADE20k linear probing.",
+   "A frozen DINOv3 backbone paired with a lightweight 100M detector also surpasses fully fine-tuned detection models like PEspatial on COCO."
+  ],
+  "hint": "Select a row to see detailed task comparisons and evaluation setups.",
+  "sources": [
+   "s6.1.2",
+   "s6.1.5",
+   "s6.2.1",
+   "s6.3.1"
+  ],
+  "type": "compare",
+  "columns": [
+   "DINOv2",
+   "Web-DINO",
+   "PEspatial / PEcore*"
+  ],
+  "rows": [
+   {
+    "id": "params",
+    "label": "Parameters",
+    "cells": [
+     "1.1B (ViT-g)",
+     "6.7B (ViT-7B)",
+     "1.9B (ViT-G)"
+    ],
+    "note": "DINOv3 scales self-supervised Vision Transformers to 6.7B parameters, matching the scale of Web-DINO while avoiding feature degradation."
+   },
+   {
+    "id": "supervision",
+    "label": "Supervision",
+    "cells": [
+     "self-supervised",
+     "self-supervised",
+     "weakly supervised*"
+    ],
+    "note": "PEspatial and PEcore rely on text captions and distilled masks from SAM. DINOv3 trains without human-annotated labels or text pairs."
+   },
+   {
+    "id": "ade20k",
+    "label": "ADE20k linear mIoU",
+    "cells": [
+     "49.5",
+     "42.7",
+     "49.3"
+    ],
+    "mark": true,
+    "note": "DINOv3 reaches 55.9 mIoU with a frozen backbone and linear probe, outperforming DINOv2 by 6.4 points and recovering from Web-DINO's collapse (42.7). PEspatial scores 49.3."
+   },
+   {
+    "id": "depth",
+    "label": "NYUv2 depth RMSE",
+    "cells": [
+     "0.372",
+     "0.466",
+     "0.362"
+    ],
+    "mark": true,
+    "note": "Monocular depth linear probe error is lower is better. DINOv3 achieves 0.309 RMSE, outperforming DINOv2 (0.372) and PEspatial (0.362)."
+   },
+   {
+    "id": "davis",
+    "label": "DAVIS-L video J&F",
+    "cells": [
+     "76.6",
+     "69.5",
+     "70.5"
+    ],
+    "mark": true,
+    "note": "Non-parametric video tracking score. DINOv3 reaches 83.3 J&F at large resolution, 6.7 points higher than DINOv2 and 12.8 points above PEspatial."
+   },
+   {
+    "id": "in1k",
+    "label": "ImageNet-1k linear top-1",
+    "cells": [
+     "87.3%",
+     "85.9%",
+     "89.3%*"
+    ],
+    "note": "DINOv3 obtains 88.4% top-1 accuracy on ImageNet-1k val with a linear probe on the CLS token. PEcore reaches 89.3% using paired caption pre-training."
+   },
+   {
+    "id": "coco",
+    "label": "COCO detection mAP",
+    "cells": [
+     "—",
+     "—",
+     "66.0 (fine-tuned)"
+    ],
+    "mark": true,
+    "note": "DINOv3 reaches 66.1 mAP on COCO (TTA) using a frozen backbone and a 100M Plain-DETR decoder. PEspatial reaches 66.0 mAP while fine-tuning the full 2B model."
+   }
+  ]
+ },
+ {
+  "id": "map",
+  "type": "landscape",
+  "nav": "Around it",
+  "head": "Around DINOv3 on the map",
+  "body": [
+   "DINOv3 sits among the papers it builds on, reuses, measures itself against, and feeds. Colour shows how each relates; height shows how much DINOv3 leans on it. Hatched tiles are directions the paper leaves open."
+  ],
+  "hint": "Select a tile.",
+  "sources": [],
+  "center": {
+   "label": "DINOv3"
+  },
+  "tiles": [
+   {
+    "id": "dinov2",
+    "label": "DINOv2",
+    "year": "2024",
+    "title": "DINOv2: Learning Robust Visual Features without Supervision",
+    "authors": "Oquab et al.",
+    "venue": "TMLR",
+    "relation": "lineage",
+    "weight": 3,
+    "link": "DINOv3 builds directly on the architecture, loss formulation, and data curation established in DINOv2, extending it from 1.1B to 6.7B parameters.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Combination of DINO image loss and iBOT masked patch loss",
+     "Sinkhorn-Knopp centering from SwAV",
+     "KoLeo regularizer to distribute batch features",
+     "Multi-crop augmentation with global and local crops"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Added Gram anchoring to prevent dense patch degradation",
+     "Replaced learnable position embeddings with axial RoPE",
+     "Trained with constant learning rate schedules instead of cosine decay",
+     "Scaled model size from 1.1B to 6.7B parameters"
+    ]
+   },
+   {
+    "id": "ibot",
+    "label": "iBOT",
+    "year": "2021",
+    "title": "iBOT: Image BERT Pre-Training with Online Tokenizer",
+    "authors": "Zhou et al.",
+    "venue": "arXiv",
+    "arxiv": "2111.07832",
+    "relation": "component",
+    "weight": 3,
+    "link": "iBOT provides the masked patch-level latent reconstruction objective used as one of two primary training losses in DINOv3.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Patch-level cross-entropy loss on masked tokens",
+     "Online teacher as tokenizer for masked visual patches"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Applied dedicated layer norm to outputs before computing loss",
+     "Gram anchoring regularizes student patches against early teacher Gram matrices"
+    ]
+   },
+   {
+    "id": "dino",
+    "label": "DINO",
+    "year": "2021",
+    "title": "Emerging Properties in Self-Supervised Vision Transformers",
+    "authors": "Caron et al.",
+    "venue": "ICCV",
+    "relation": "lineage",
+    "weight": 3,
+    "link": "DINO established self-distillation with a momentum teacher and cross-entropy loss for Vision Transformers, which DINOv3 retains at its core.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Momentum teacher parameter update via EMA",
+     "Cross-entropy loss on the CLS token across global and local crops"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Replaced teacher centering with Sinkhorn-Knopp normalisation",
+     "Added patch-level reconstruction and Gram anchoring losses"
+    ]
+   },
+   {
+    "id": "registers",
+    "label": "Registers",
+    "year": "2024",
+    "title": "Vision Transformers Need Registers",
+    "authors": "Darcet et al.",
+    "venue": "ICLR",
+    "relation": "component",
+    "weight": 2,
+    "link": "DINOv3 incorporates four register tokens into the ViT sequence to absorb background activations and stop high-norm patch outliers.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Four register tokens added to the input sequence",
+     "Discarding register tokens when evaluating dense feature maps"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Showed registers alone do not stop dense map degradation during multi-epoch scaling",
+     "Combined registers with Gram anchoring"
+    ]
+   },
+   {
+    "id": "clip",
+    "label": "CLIP",
+    "year": "2021",
+    "title": "Learning Transferable Visual Models From Natural Language Supervision",
+    "authors": "Radford et al.",
+    "venue": "ICML",
+    "relation": "compare",
+    "weight": 2,
+    "link": "CLIP represents the dominant weakly supervised vision-language baseline. DINOv3 compares against CLIP variants and adapts to text using a frozen backbone.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Large-scale web image pre-training enables broad zero-shot generalization",
+     "Transferability across diverse classification distributions"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "DINOv3 uses self-supervised learning without text pairings during pre-training",
+     "DINOv3 dense features outperform CLIP on segmentation, depth, and tracking",
+     "CLIP retains an advantage on OCR-heavy visual tasks"
+    ]
+   },
+   {
+    "id": "pespatial",
+    "label": "PEspatial",
+    "year": "2025",
+    "title": "Perception Encoder: The Best Visual Embeddings Are Not at the Output of the Network",
+    "authors": "Bolya et al.",
+    "venue": "arXiv",
+    "relation": "compare",
+    "weight": 2,
+    "link": "PEspatial is an agglomerative foundation model distilled from SAM 2 and trained with 86B image-text pairs. It serves as a primary dense baseline against DINOv3.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Dense feature quality is critical for downstream geometric and spatial tasks",
+     "Both distill larger frontier models into manageable deployable backbones"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "PEspatial relies on heavily supervised segmentation data from SAM 2",
+     "DINOv3 achieves superior dense linear probe metrics purely from self-supervision",
+     "DINOv3 dense tracking scales better with input resolution"
+    ]
+   },
+   {
+    "id": "webdino",
+    "label": "Web-DINO",
+    "year": "2025",
+    "title": "Scaling Language-Free Visual Representation Learning",
+    "authors": "Fan et al.",
+    "venue": "arXiv",
+    "arxiv": "2504.01017",
+    "relation": "compare",
+    "weight": 2,
+    "link": "Web-DINO scaled DINOv2 to 7B parameters without data curation, demonstrating dense feature collapse. DINOv3 directly addresses this collapse.",
+    "carriedHeading": "Where they agree",
+    "carried": [
+     "Scaling self-supervised models to 7B parameters improves global recognition",
+     "Longer training schedules without intervention cause patch-level degradation"
+    ],
+    "changedHeading": "Where they differ",
+    "changed": [
+     "Web-DINO uses uncurated data; DINOv3 curates a 1.689B image pool",
+     "DINOv3 uses Gram anchoring to recover and boost dense feature quality",
+     "DINOv3 achieves 55.9 ADE20k linear probe mIoU versus 42.7 for Web-DINO"
+    ]
+   },
+   {
+    "id": "plaindetr",
+    "label": "Plain-DETR",
+    "year": "2023",
+    "title": "DETR Does Not Need Multi-Scale or Locality Design",
+    "authors": "Lin et al.",
+    "venue": "ICCV",
+    "relation": "downstream",
+    "weight": 2,
+    "link": "DINOv3 attaches a lightweight Plain-DETR decoder to its frozen backbone, achieving competitive object detection results without backbone fine-tuning.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Single-scale transformer decoder architecture with one-to-one and one-to-many queries",
+     "Focal loss and box regression objectives"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Decoupled the transformer encoder from the backbone to keep DINOv3 frozen",
+     "Introduced a 3x3 windowing strategy combining global and local image crops",
+     "Adopted IA-BCE loss during COCO fine-tuning"
+    ]
+   },
+   {
+    "id": "dav2",
+    "label": "Depth Anything V2",
+    "year": "2024",
+    "title": "Depth Anything V2",
+    "authors": "Yang et al.",
+    "venue": "NeurIPS",
+    "relation": "downstream",
+    "weight": 2,
+    "link": "DINOv3 replaces DINOv2 in the Depth Anything V2 framework, achieving higher accuracy across benchmarks in monocular depth estimation while keeping the backbone frozen.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "Dense Prediction Transformer (DPT) decoder architecture",
+     "Pre-training on synthetic datasets to bridge the sim-to-real gap"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Kept the 7B image backbone completely frozen instead of fine-tuning",
+     "Scaled the DPT decoder head and increased training resolution to 1024x768"
+    ]
+   },
+   {
+    "id": "vggt",
+    "label": "VGGT",
+    "year": "2025",
+    "title": "VGGT: Visual Geometry Grounded Transformer",
+    "authors": "Wang et al.",
+    "venue": "CVPR",
+    "relation": "downstream",
+    "weight": 2,
+    "link": "DINOv3 ViT-L replaces DINOv2 ViT-L as the visual backbone in VGGT, improving performance across camera pose estimation, multi-view depth, and view matching.",
+    "carriedHeading": "Carried into DINOv3",
+    "carried": [
+     "VGGT multi-view fusion transformer framework",
+     "Joint training for 3D camera poses and scene geometry"
+    ],
+    "changedHeading": "Changed in DINOv3",
+    "changed": [
+     "Replaced DINOv2 ViT-L/14 with DINOv3 ViT-L/16 at 592x592 resolution",
+     "Fed concatenated intermediate layers (10, 20, 30, 40) into the VGGT module"
+    ]
+   }
+  ],
+  "open": [
+   {
+    "id": "ocr_gap",
+    "label": "Closing the OCR Gap",
+    "title": "Closing the Character Recognition Gap in Pure SSL",
+    "shows": "DINOv3 lags behind weakly supervised models on OCR-heavy datasets like GTSRB and FlickrLogos because it lacks text pairings during pre-training.",
+    "open": "Can self-supervised pre-training learn fine-grained text glyph associations without explicit text annotations, perhaps through synthetic rendering or crop curation?",
+    "move": "Train a self-supervised model on a curated subset enriched with scene text and measure linear probe accuracy on Logo-2K+ and GTSRB.",
+    "from": [
+     "clip",
+     "pespatial"
+    ]
+   },
+   {
+    "id": "online_gram",
+    "label": "Continuous Gram",
+    "title": "Integrating Gram Anchoring Directly Into Early Pre-training",
+    "shows": "Gram anchoring is applied as a refinement phase after 1M iterations, repairing noisy dense maps within 10k iterations.",
+    "open": "Whether applying Gram regularization continuously from iteration zero—using a slow momentum EMA or down-sampled teacher—prevents dense collapse altogether without a multi-phase pipeline.",
+    "move": "Ablate a continuous Gram penalty against a moving average buffer starting at iteration 50k on a ViT-B model.",
+    "from": [
+     "dinov2",
+     "ibot"
+    ]
+   },
+   {
+    "id": "channel_outliers",
+    "label": "Channel Outliers",
+    "title": "Mitigating Hidden Channel Outliers in Intermediate Layers",
+    "shows": "Intermediate transformer layers develop extreme channel-wise outliers that require batch normalization when used downstream.",
+    "open": "Why channel outliers emerge selectively in large ViTs and how to constrain them natively during training without damaging feature quality.",
+    "move": "Test per-block LayerNorm scaling or channel-wise weight clipping on a 7B model and evaluate intermediate-layer probe stability.",
+    "from": [
+     "registers",
+     "dinov2"
+    ]
+   },
+   {
+    "id": "frozen_multimodal",
+    "label": "Multimodal Encoders",
+    "title": "End-to-End Multimodal Alignment With Frozen Dense Features",
+    "shows": "dino.txt aligns a text encoder to frozen DINOv3 features, achieving 24.7 mIoU on zero-shot ADE20k segmentation.",
+    "open": "How well frozen DINOv3 features integrate into modern visual language models compared to CLIP or SigLIP backbones on complex reasoning tasks.",
+    "move": "Replace the visual encoder in an open-source VLM with frozen DINOv3 ViT-L and evaluate on spatial reasoning benchmarks like MMMU and RefCOCO.",
+    "from": [
+     "clip",
+     "dinov2"
+    ]
+   }
+  ]
+ }
+]

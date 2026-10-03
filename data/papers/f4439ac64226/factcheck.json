@@ -1,0 +1,5 @@
+[
+ "0/steps/4/note: partly → rewritten (Table 6 shows the distilled models use Qwen2.5-Math, Qwen2.5, Llama-3.1-8B, and Llama-3.3-70B-Instruct, not exclusively Qwen2.5 and Llama-3.1 dense base models.)",
+ "3/rows/4/note: partly → rewritten (Section 2.1 and Table 1 state R1-Zero already enforced enclosing reasoning and answers within designated tags. DeepSeek-R1 focuses on conversational tone and readable summaries.)",
+ "4/rows/4/note: partly → rewritten (The text compares Qwen2-Math-7B-Zero with DeepSeek-R1-Distill-Qwen-7B, but these are based on different base models (Qwen2-Math vs Qwen2.5-Math) and tested under different conditions/tables.)"
+]

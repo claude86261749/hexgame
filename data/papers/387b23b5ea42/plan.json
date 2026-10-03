@@ -1,0 +1,67 @@
+{
+ "diagrams": [
+  {
+   "id": "g1",
+   "type": "pipeline",
+   "nav": "Full training pipeline",
+   "question": "How is the 7B foundation model trained and adapted across stages?",
+   "mustShow": "Five distinct stages in sequence: 1) Data curation filtering 1.689B images; 2) Constant-schedule pre-training for 1M iterations using DINO, iBOT, and KoLeo losses; 3) Gram anchoring refinement to stabilize patch features; 4) Resolution scaling on crops up to 768x768 pixels; 5) Multi-student distillation into smaller ViT and ConvNeXt models.",
+   "sources": [
+    "s3.1",
+    "s3.2",
+    "s4.2",
+    "s5.1",
+    "s5.2"
+   ]
+  },
+  {
+   "id": "g2",
+   "type": "chart",
+   "nav": "Dense feature collapse",
+   "question": "Why do dense patch representations degrade during extended pre-training?",
+   "mustShow": "Two curves plotted across 0 to 1M pre-training iterations: ImageNet-1k linear probe accuracy climbing steadily from 75% to 88%, alongside dense segmentation probe accuracy (ADE20k mIoU) which peaks near 300k iterations and declines by several points without Gram anchoring intervention.",
+   "sources": [
+    "s1",
+    "s4.1",
+    "s6.1.2",
+    "s6.2.1"
+   ]
+  },
+  {
+   "id": "g3",
+   "type": "flow",
+   "nav": "Gram anchoring mechanism",
+   "question": "How does Gram anchoring restore spatial consistency without hurting global accuracy?",
+   "mustShow": "Dual-path dataflow: input image passed to the active student network at 1x resolution and to a frozen early anchor checkpoint at 2x resolution with 2x2 patch pooling. Each branch produces a patch-by-patch Gram similarity matrix. An L1 Gram loss penalizes differences between student and anchor similarity matrices alongside the primary DINO and iBOT losses.",
+   "sources": [
+    "s4.2",
+    "s4.3"
+   ]
+  },
+  {
+   "id": "g4",
+   "type": "flow",
+   "nav": "Multi-student distillation",
+   "question": "How does DINOv3 transfer 7B capabilities into smaller deployable architectures?",
+   "mustShow": "One frozen 7B teacher forward pass broadcast across GPU groups to train multiple student architectures simultaneously (ViT-S, ViT-B, ViT-L, ViT-H+, and ConvNeXt). Students match CLS token distributions via cross-entropy and patch token embeddings via cosine similarity, reducing inference compute by up to 8x.",
+   "sources": [
+    "s5.2",
+    "s7.1",
+    "s7.2"
+   ]
+  },
+  {
+   "id": "g5",
+   "type": "compare",
+   "nav": "DINOv3 vs prior models",
+   "question": "How does frozen DINOv3 compare with supervised and self-supervised foundation models?",
+   "mustShow": "A structured table comparing DINOv3 against DINOv2, PEspatial, Web-DINO, and OpenCLIP. Rows show model parameter counts, pre-training supervision type, ADE20k linear probe mIoU (55.9 for DINOv3 vs 49.5 for DINOv2), COCO Plain-DETR mAP (66.1), ImageNet-1k linear top-1 (88.4%), and DAVIS video tracking J&F (83.3).",
+   "sources": [
+    "s6.1.2",
+    "s6.1.5",
+    "s6.2.1",
+    "s6.3.1"
+   ]
+  }
+ ]
+}

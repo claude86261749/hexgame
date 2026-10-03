@@ -1,0 +1,5 @@
+[
+ "3/body/2: partly → rewritten (Inference FLOPs reduction is up to roughly 230x (or 8x specifically for ViT-H+ alone), and style forbids the evaluation word 'performance'.)",
+ "4/body/0: partly → rewritten (The text contains 'performance', which violates the style guide banning evaluation words.)",
+ "5/tiles/8/link: partly → rewritten (The phrase 'setting strong results' contains the banned evaluation word 'strong'.)"
+]

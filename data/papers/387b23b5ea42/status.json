@@ -1,0 +1,44 @@
+{
+ "stage": "done",
+ "items": [
+  {
+   "id": "g1",
+   "nav": "Full training pipeline",
+   "type": "pipeline",
+   "state": "ok"
+  },
+  {
+   "id": "g2",
+   "nav": "Dense feature collapse",
+   "type": "chart",
+   "state": "ok",
+   "note": "1 repair"
+  },
+  {
+   "id": "g3",
+   "nav": "Gram anchoring mechanism",
+   "type": "flow",
+   "state": "ok",
+   "note": "1 repair"
+  },
+  {
+   "id": "g4",
+   "nav": "Multi-student distillation",
+   "type": "flow",
+   "state": "ok",
+   "note": "1 repair"
+  },
+  {
+   "id": "g5",
+   "nav": "DINOv3 vs prior models",
+   "type": "compare",
+   "state": "ok"
+  },
+  {
+   "id": "map",
+   "nav": "Around it",
+   "type": "landscape",
+   "state": "ok"
+  }
+ ]
+}

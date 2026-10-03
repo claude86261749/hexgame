@@ -1,0 +1,488 @@
+{
+ "title": "DINOv3",
+ "shortTitle": "DINOv3",
+ "byline": "Siméoni, Vo, Seitzer, Baldassarre, Oquab and colleagues, Meta AI Research, WRI, Inria, 2025",
+ "arxiv": "2508.10104",
+ "field": "Self-supervised vision",
+ "gist": "DINOv3 scales self-supervised pre-training to a 7B-parameter Vision Transformer on nearly 1.7B images without human labels. It introduces Gram anchoring to prevent dense patch feature collapse during long training runs.",
+ "problem": {
+  "text": "Self-supervised models degrade in dense patch-level consistency when trained for long schedules at large scale. While global classification accuracy continues to rise, local patch representations become noisy and lose spatial precision.",
+  "sources": [
+   "s1",
+   "s4",
+   "s4.1"
+  ]
+ },
+ "newIdea": {
+  "text": "Gram anchoring penalizes changes in the Gram matrix of patch similarities relative to an earlier checkpoint. It lets individual patch features move while locking their pairwise similarity structure to that of an earlier model with clean dense maps.",
+  "sources": [
+   "s1",
+   "s4.2",
+   "s4.3"
+  ]
+ },
+ "claims": [
+  {
+   "text": "Gram anchoring fixes the degradation of dense feature maps during extended training runs without hurting global metrics.",
+   "sources": [
+    "s4",
+    "s4.2",
+    "s4.3"
+   ]
+  },
+  {
+   "text": "A frozen 7B DINOv3 backbone matches or exceeds supervised and weakly supervised models on dense tasks like segmentation and depth estimation.",
+   "sources": [
+    "s1",
+    "s6.1.2",
+    "s6.3.1",
+    "s6.3.2"
+   ]
+  },
+  {
+   "text": "Distilling the 7B teacher into smaller Vision Transformers and ConvNeXt models preserves dense and global accuracy across compute budgets.",
+   "sources": [
+    "s5.2",
+    "s7",
+    "s7.1",
+    "s7.2"
+   ]
+  },
+  {
+   "text": "The self-supervised training recipe transfers directly to other domains such as satellite imagery without algorithmic changes.",
+   "sources": [
+    "s8",
+    "s8.1",
+    "s8.2",
+    "s8.3"
+   ]
+  }
+ ],
+ "method": [
+  {
+   "step": "Data curation",
+   "detail": "Curate a 1.689B image dataset (LVD-1689M) from 17B Instagram images using hierarchical k-means and balanced sampling, combined with retrieval and public datasets.",
+   "sources": [
+    "s3.1"
+   ]
+  },
+  {
+   "step": "Constant-schedule pre-training",
+   "detail": "Train a 6.7B parameter ViT-7B for 1M iterations using DINO, iBOT, and distributed KoLeo objectives with constant learning rates and RoPE position embeddings.",
+   "sources": [
+    "s3.2",
+    "sC"
+   ]
+  },
+  {
+   "step": "Gram anchoring refinement",
+   "detail": "Add a Gram loss matching student patch-similarity Gram matrices against a down-sampled 2x-resolution teacher checkpoint from early iterations.",
+   "sources": [
+    "s4.2",
+    "s4.3"
+   ]
+  },
+  {
+   "step": "Resolution scaling",
+   "detail": "Fine-tune for 10k steps on mixed crops up to 768x768 pixels with continued Gram anchoring to enable inference up to 4096x4096 pixels.",
+   "sources": [
+    "s5.1",
+    "sC"
+   ]
+  },
+  {
+   "step": "Multi-student distillation",
+   "detail": "Distill the frozen 7B teacher simultaneously into smaller ViT and ConvNeXt students by sharing teacher inference across all student GPU groups.",
+   "sources": [
+    "s5.2"
+   ]
+  },
+  {
+   "step": "Text alignment",
+   "detail": "Train a text encoder with contrastive loss on image captions while freezing the vision backbone and matching concatenated CLS and pooled patch tokens.",
+   "sources": [
+    "s5.3",
+    "s7.3"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "text": "On ADE20k semantic segmentation with a linear probe, DINOv3 achieves 55.9 mIoU, outperforming DINOv2 (49.5 mIoU) and PEspatial (49.3 mIoU).",
+   "sources": [
+    "s6.1.2"
+   ]
+  },
+  {
+   "text": "With a frozen backbone and a 100M parameter Plain-DETR decoder, DINOv3 reaches 66.1 mAP on COCO object detection and 66.4 mAP on out-of-distribution COCO-O.",
+   "sources": [
+    "s6.3.1"
+   ]
+  },
+  {
+   "text": "With a frozen backbone and Mask2Former decoder, DINOv3 reaches 63.0 mIoU on ADE20k segmentation, matching fully fine-tuned models like ONE-PEACE.",
+   "sources": [
+    "s6.3.2"
+   ]
+  },
+  {
+   "text": "On ImageNet-1k linear probing, DINOv3 reaches 88.4% top-1 validation accuracy and 90.4% on ImageNet-ReaL, while scoring 79.0% on ObjectNet.",
+   "sources": [
+    "s6.2.1"
+   ]
+  },
+  {
+   "text": "On DAVIS video segmentation tracking, DINOv3 achieves 83.3 J&F at large resolution using non-parametric label propagation, 6.7 points above DINOv2.",
+   "sources": [
+    "s6.1.5"
+   ]
+  },
+  {
+   "text": "Distilled ViT-H+ (840M parameters) matches the 7B teacher across dense and global benchmarks while reducing inference FLOPs by nearly 8x.",
+   "sources": [
+    "s7",
+    "s7.1"
+   ]
+  },
+  {
+   "text": "Pre-training on 493M satellite images reduces canopy height estimation mean absolute error from 2.4 to 2.2 on SatLidar and from 2.42 to 2.02 on Open-Canopy.",
+   "sources": [
+    "s8.1",
+    "s8.2"
+   ]
+  }
+ ],
+ "limitations": [
+  {
+   "text": "On OCR-heavy classification benchmarks such as GTSRB and Logo-2K+, DINOv3 lags behind weakly supervised models like PE-core because it lacks paired text supervision during pre-training.",
+   "sources": [
+    "sB.4"
+   ]
+  },
+  {
+   "text": "A performance drop of 23% remains on low-income data compared to high-income data, and a 14% difference persists between Europe and Africa.",
+   "sources": [
+    "sB.5"
+   ]
+  },
+  {
+   "text": "Feature dimension outliers emerge in intermediate layers during 7B training, requiring batch normalization or PCA when using intermediate features.",
+   "sources": [
+    "sA.2"
+   ]
+  },
+  {
+   "text": "Gram anchoring adds computational overhead during refinement and requires storing or evaluating an earlier checkpoint as the Gram teacher.",
+   "sources": [
+    "s4.2",
+    "s4.3"
+   ]
+  }
+ ],
+ "related": [
+  {
+   "id": "dinov2",
+   "label": "DINOv2",
+   "year": "2024",
+   "title": "DINOv2: Learning Robust Visual Features without Supervision",
+   "authors": "Oquab et al.",
+   "venue": "TMLR",
+   "relation": "lineage",
+   "weight": 3,
+   "link": "DINOv3 builds directly on the architecture, loss formulation, and data curation established in DINOv2, extending it from 1.1B to 6.7B parameters.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Combination of DINO image loss and iBOT masked patch loss",
+    "Sinkhorn-Knopp centering from SwAV",
+    "KoLeo regularizer to distribute batch features",
+    "Multi-crop augmentation with global and local crops"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Added Gram anchoring to prevent dense patch degradation",
+    "Replaced learnable position embeddings with axial RoPE",
+    "Trained with constant learning rate schedules instead of cosine decay",
+    "Scaled model size from 1.1B to 6.7B parameters"
+   ]
+  },
+  {
+   "id": "ibot",
+   "label": "iBOT",
+   "year": "2021",
+   "title": "iBOT: Image BERT Pre-Training with Online Tokenizer",
+   "authors": "Zhou et al.",
+   "venue": "arXiv",
+   "arxiv": "2111.07832",
+   "relation": "component",
+   "weight": 3,
+   "link": "iBOT provides the masked patch-level latent reconstruction objective used as one of two primary training losses in DINOv3.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Patch-level cross-entropy loss on masked tokens",
+    "Online teacher as tokenizer for masked visual patches"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Applied dedicated layer norm to outputs before computing loss",
+    "Gram anchoring regularizes student patches against early teacher Gram matrices"
+   ]
+  },
+  {
+   "id": "dino",
+   "label": "DINO",
+   "year": "2021",
+   "title": "Emerging Properties in Self-Supervised Vision Transformers",
+   "authors": "Caron et al.",
+   "venue": "ICCV",
+   "relation": "lineage",
+   "weight": 3,
+   "link": "DINO established self-distillation with a momentum teacher and cross-entropy loss for Vision Transformers, which DINOv3 retains at its core.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Momentum teacher parameter update via EMA",
+    "Cross-entropy loss on the CLS token across global and local crops"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Replaced teacher centering with Sinkhorn-Knopp normalisation",
+    "Added patch-level reconstruction and Gram anchoring losses"
+   ]
+  },
+  {
+   "id": "registers",
+   "label": "Registers",
+   "year": "2024",
+   "title": "Vision Transformers Need Registers",
+   "authors": "Darcet et al.",
+   "venue": "ICLR",
+   "relation": "component",
+   "weight": 2,
+   "link": "DINOv3 incorporates four register tokens into the ViT sequence to absorb background activations and stop high-norm patch outliers.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Four register tokens added to the input sequence",
+    "Discarding register tokens when evaluating dense feature maps"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Showed registers alone do not stop dense map degradation during multi-epoch scaling",
+    "Combined registers with Gram anchoring"
+   ]
+  },
+  {
+   "id": "clip",
+   "label": "CLIP",
+   "year": "2021",
+   "title": "Learning Transferable Visual Models From Natural Language Supervision",
+   "authors": "Radford et al.",
+   "venue": "ICML",
+   "relation": "compare",
+   "weight": 2,
+   "link": "CLIP represents the dominant weakly supervised vision-language baseline. DINOv3 compares against CLIP variants and adapts to text using a frozen backbone.",
+   "carriedHeading": "Where they agree",
+   "carried": [
+    "Large-scale web image pre-training enables broad zero-shot generalization",
+    "Transferability across diverse classification distributions"
+   ],
+   "changedHeading": "Where they differ",
+   "changed": [
+    "DINOv3 uses self-supervised learning without text pairings during pre-training",
+    "DINOv3 dense features outperform CLIP on segmentation, depth, and tracking",
+    "CLIP retains an advantage on OCR-heavy visual tasks"
+   ]
+  },
+  {
+   "id": "pespatial",
+   "label": "PEspatial",
+   "year": "2025",
+   "title": "Perception Encoder: The Best Visual Embeddings Are Not at the Output of the Network",
+   "authors": "Bolya et al.",
+   "venue": "arXiv",
+   "relation": "compare",
+   "weight": 2,
+   "link": "PEspatial is an agglomerative foundation model distilled from SAM 2 and trained with 86B image-text pairs. It serves as a primary dense baseline against DINOv3.",
+   "carriedHeading": "Where they agree",
+   "carried": [
+    "Dense feature quality is critical for downstream geometric and spatial tasks",
+    "Both distill larger frontier models into manageable deployable backbones"
+   ],
+   "changedHeading": "Where they differ",
+   "changed": [
+    "PEspatial relies on heavily supervised segmentation data from SAM 2",
+    "DINOv3 achieves superior dense linear probe metrics purely from self-supervision",
+    "DINOv3 dense tracking scales better with input resolution"
+   ]
+  },
+  {
+   "id": "webdino",
+   "label": "Web-DINO",
+   "year": "2025",
+   "title": "Scaling Language-Free Visual Representation Learning",
+   "authors": "Fan et al.",
+   "venue": "arXiv",
+   "arxiv": "2504.01017",
+   "relation": "compare",
+   "weight": 2,
+   "link": "Web-DINO scaled DINOv2 to 7B parameters without data curation, demonstrating dense feature collapse. DINOv3 directly addresses this collapse.",
+   "carriedHeading": "Where they agree",
+   "carried": [
+    "Scaling self-supervised models to 7B parameters improves global recognition",
+    "Longer training schedules without intervention cause patch-level degradation"
+   ],
+   "changedHeading": "Where they differ",
+   "changed": [
+    "Web-DINO uses uncurated data; DINOv3 curates a 1.689B image pool",
+    "DINOv3 uses Gram anchoring to recover and boost dense feature quality",
+    "DINOv3 achieves 55.9 ADE20k linear probe mIoU versus 42.7 for Web-DINO"
+   ]
+  },
+  {
+   "id": "plaindetr",
+   "label": "Plain-DETR",
+   "year": "2023",
+   "title": "DETR Does Not Need Multi-Scale or Locality Design",
+   "authors": "Lin et al.",
+   "venue": "ICCV",
+   "relation": "downstream",
+   "weight": 2,
+   "link": "DINOv3 attaches a lightweight Plain-DETR decoder to its frozen backbone, achieving competitive object detection results without backbone fine-tuning.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Single-scale transformer decoder architecture with one-to-one and one-to-many queries",
+    "Focal loss and box regression objectives"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Decoupled the transformer encoder from the backbone to keep DINOv3 frozen",
+    "Introduced a 3x3 windowing strategy combining global and local image crops",
+    "Adopted IA-BCE loss during COCO fine-tuning"
+   ]
+  },
+  {
+   "id": "dav2",
+   "label": "Depth Anything V2",
+   "year": "2024",
+   "title": "Depth Anything V2",
+   "authors": "Yang et al.",
+   "venue": "NeurIPS",
+   "relation": "downstream",
+   "weight": 2,
+   "link": "DINOv3 replaces DINOv2 in the Depth Anything V2 framework, setting strong results in monocular depth estimation while keeping the backbone frozen.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "Dense Prediction Transformer (DPT) decoder architecture",
+    "Pre-training on synthetic datasets to bridge the sim-to-real gap"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Kept the 7B image backbone completely frozen instead of fine-tuning",
+    "Scaled the DPT decoder head and increased training resolution to 1024x768"
+   ]
+  },
+  {
+   "id": "vggt",
+   "label": "VGGT",
+   "year": "2025",
+   "title": "VGGT: Visual Geometry Grounded Transformer",
+   "authors": "Wang et al.",
+   "venue": "CVPR",
+   "relation": "downstream",
+   "weight": 2,
+   "link": "DINOv3 ViT-L replaces DINOv2 ViT-L as the visual backbone in VGGT, improving performance across camera pose estimation, multi-view depth, and view matching.",
+   "carriedHeading": "Carried into DINOv3",
+   "carried": [
+    "VGGT multi-view fusion transformer framework",
+    "Joint training for 3D camera poses and scene geometry"
+   ],
+   "changedHeading": "Changed in DINOv3",
+   "changed": [
+    "Replaced DINOv2 ViT-L/14 with DINOv3 ViT-L/16 at 592x592 resolution",
+    "Fed concatenated intermediate layers (10, 20, 30, 40) into the VGGT module"
+   ]
+  }
+ ],
+ "openDirections": [
+  {
+   "id": "ocr_gap",
+   "label": "Closing the OCR Gap",
+   "title": "Closing the Character Recognition Gap in Pure SSL",
+   "shows": "DINOv3 lags behind weakly supervised models on OCR-heavy datasets like GTSRB and FlickrLogos because it lacks text pairings during pre-training.",
+   "open": "Can self-supervised pre-training learn fine-grained text glyph associations without explicit text annotations, perhaps through synthetic rendering or crop curation?",
+   "move": "Train a self-supervised model on a curated subset enriched with scene text and measure linear probe accuracy on Logo-2K+ and GTSRB.",
+   "from": [
+    "clip",
+    "pespatial"
+   ]
+  },
+  {
+   "id": "online_gram",
+   "label": "Continuous Gram",
+   "title": "Integrating Gram Anchoring Directly Into Early Pre-training",
+   "shows": "Gram anchoring is applied as a refinement phase after 1M iterations, repairing noisy dense maps within 10k iterations.",
+   "open": "Whether applying Gram regularization continuously from iteration zero—using a slow momentum EMA or down-sampled teacher—prevents dense collapse altogether without a multi-phase pipeline.",
+   "move": "Ablate a continuous Gram penalty against a moving average buffer starting at iteration 50k on a ViT-B model.",
+   "from": [
+    "dinov2",
+    "ibot"
+   ]
+  },
+  {
+   "id": "channel_outliers",
+   "label": "Channel Outliers",
+   "title": "Mitigating Hidden Channel Outliers in Intermediate Layers",
+   "shows": "Intermediate transformer layers develop extreme channel-wise outliers that require batch normalization when used downstream.",
+   "open": "Why channel outliers emerge selectively in large ViTs and how to constrain them natively during training without damaging feature quality.",
+   "move": "Test per-block LayerNorm scaling or channel-wise weight clipping on a 7B model and evaluate intermediate-layer probe stability.",
+   "from": [
+    "registers",
+    "dinov2"
+   ]
+  },
+  {
+   "id": "frozen_multimodal",
+   "label": "Multimodal Encoders",
+   "title": "End-to-End Multimodal Alignment With Frozen Dense Features",
+   "shows": "dino.txt aligns a text encoder to frozen DINOv3 features, achieving 24.7 mIoU on zero-shot ADE20k segmentation.",
+   "open": "How well frozen DINOv3 features integrate into modern visual language models compared to CLIP or SigLIP backbones on complex reasoning tasks.",
+   "move": "Replace the visual encoder in an open-source VLM with frozen DINOv3 ViT-L and evaluate on spatial reasoning benchmarks like MMMU and RefCOCO.",
+   "from": [
+    "clip",
+    "dinov2"
+   ]
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Gram matrix",
+   "plain": "A square matrix containing pairwise dot products between all patch features in an image, capturing spatial relationship patterns."
+  },
+  {
+   "term": "Register tokens",
+   "plain": "Extra learnable tokens appended to the input sequence that absorb background noise without carrying spatial information."
+  },
+  {
+   "term": "Linear probing",
+   "plain": "Evaluating frozen features by training a single linear layer on top without updating the backbone weights."
+  },
+  {
+   "term": "Rotary Position Embedding (RoPE)",
+   "plain": "A position encoding method that injects spatial coordinates by rotating query and key vectors in attention heads."
+  },
+  {
+   "term": "Attentive probe",
+   "plain": "A shallow transformer classifier trained on top of frozen features across space and time to evaluate video representations."
+  },
+  {
+   "term": "CorLoc",
+   "plain": "Correct Localization metric measuring the percentage of images where a predicted bounding box overlaps ground truth by over 50% IoU."
+  },
+  {
+   "term": "Ortho-rectified",
+   "plain": "Satellite imagery geometrically corrected so that scale is uniform and terrain distortions are removed."
+  },
+  {
+   "term": "Sim-to-real",
+   "plain": "Transferring models trained on synthetic data to perform accurately on real-world sensory inputs."
+  }
+ ]
+}

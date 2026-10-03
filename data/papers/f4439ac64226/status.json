@@ -1,0 +1,43 @@
+{
+ "stage": "done",
+ "items": [
+  {
+   "id": "g1",
+   "nav": "Four-stage training pipeline",
+   "type": "pipeline",
+   "state": "ok",
+   "note": "1 repair"
+  },
+  {
+   "id": "g2",
+   "nav": "GRPO reward and update flow",
+   "type": "flow",
+   "state": "ok"
+  },
+  {
+   "id": "g3",
+   "nav": "Reasoning dynamics during RL",
+   "type": "chart",
+   "state": "ok"
+  },
+  {
+   "id": "g4",
+   "nav": "DeepSeek-R1-Zero vs R1",
+   "type": "compare",
+   "state": "ok",
+   "note": "1 repair"
+  },
+  {
+   "id": "g5",
+   "nav": "Distillation vs direct RL",
+   "type": "compare",
+   "state": "ok"
+  },
+  {
+   "id": "map",
+   "nav": "Around it",
+   "type": "landscape",
+   "state": "ok"
+  }
+ ]
+}
