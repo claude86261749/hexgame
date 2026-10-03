@@ -1,7 +1,4 @@
-import { EXPEDITIONS } from '../data/expeditions';
-import { GRAD_DEFS, THEME_DEFS } from '../data/naming';
-import { OPEN } from '../data/openQuestions';
-import { PAPERS } from '../data/papers';
+import { EXPEDITIONS, GRAD_DEFS, OPEN, PAPERS, THEME_DEFS } from '../data/corpus';
 import { INTENTS, type Expedition, type Intent, type OpenQuestion, type Paper, type Pole, type Terrain, type ThemeDef, type GradDef } from '../data/types';
 import { CFG, buildIndex, findThemes, hashStr, type CorpusIndex, type Themes } from '../engine';
 

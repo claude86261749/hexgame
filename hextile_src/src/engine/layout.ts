@@ -75,6 +75,10 @@ export function buildMap(I: CorpusIndex, focal: number, opens: OpenPlot[]): MapL
         else { occ.set(cellKey(ci.q, ci.r), i); occ.set(cellKey(cj.q, cj.r), j); }
       }
       for (const [k, c] of free) {
+        /* only onto the coast: a cell with two papers around it, so no tile ends up offshore */
+        let around = 0;
+        for (const d of DIRS) { const j = occ.get(cellKey(c.q + d[0], c.r + d[1])); if (j !== undefined && j !== i) around++; }
+        if (around < 2) continue;
         const ci = pos[i], before = local(i, ci);
         occ.delete(cellKey(ci.q, ci.r)); occ.set(k, i);
         const after = local(i, c);

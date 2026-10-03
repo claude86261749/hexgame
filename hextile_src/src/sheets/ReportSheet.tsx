@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useGame } from '../components/context';
 import { pct } from '../game/text';
 import { CFG } from '../engine';
+import { META } from '../data/corpus';
 import { WORLD } from '../world/world';
 
 const Row = ({ a, s, b }: { a: string; s?: string; b: ReactNode }) => (
@@ -19,10 +20,11 @@ export function ReportBody() {
     <div className="rep">
       <h3>What went in</h3>
       <table><tbody>
-        <Row a="Papers" s="manifest: title, authors, year, venue" b={I.N} />
+        <Row a="Papers" s={`${META.name || 'the corpus'}: arXiv metadata and full text`} b={META.papers} />
+        <Row a="Foundations" s={`references cited by at least ${META.minShared} corpus papers`} b={META.foundations} />
         <Row a="Concepts" s="paper-to-concept table, after merging aliases" b={nC} />
         <Row a="Concept mentions" s={'about ' + (nM / I.N).toFixed(1) + ' per paper'} b={nM} />
-        <Row a="Citations inside the corpus" s={`${cnt('builds')} builds on, ${cnt('uses')} uses, ${cnt('compares')} compares against`} b={cnt('builds') + cnt('uses') + cnt('compares')} />
+        <Row a="Citations on the map" s={`${cnt('builds')} builds on, ${cnt('uses')} uses, ${cnt('compares')} compares against`} b={cnt('builds') + cnt('uses') + cnt('compares')} />
       </tbody></table>
       <h3>What was computed here</h3>
       <table><tbody>
@@ -38,14 +40,15 @@ export function ReportBody() {
         <Row a="Neighbours kept" s="share of each paper's five closest papers that lie within two hexes; the bar to pass is 50%" b={pct(view.checks.neighbours)} />
         <Row a="Structure in the two leading gradients" s="a clean ring would put most of it there" b={pct(view.checks.ringShare)} />
       </tbody></table>
-      <p style={{ marginTop: 10 }}>The second number is low. This corpus is not ring-shaped, so the island is a flattened picture of several gradients at once. Colour follows bearing from the centre, themes are clusters in the paper graph, and the two only roughly agree: a theme's tiles can be scattered.</p>
+      {view.checks.ringShare < 0.5 && <p style={{ marginTop: 10 }}>The second number is low. This corpus is not ring-shaped, so the island is a flattened picture of several gradients at once. Colour follows bearing from the centre, themes are clusters in the paper graph, and the two only roughly agree: a theme's tiles can be scattered.</p>}
       <h3>What is real and what is not</h3>
       <ul>
         <li><b>Computed in your browser</b> from the tables above: affinity, gradients, themes, the hex layout, colours, elevations, closest papers, these checks.</li>
-        <li><b>Hand-written stand-ins</b> for pipeline exports: the concept lists, the three citation classes, the summaries. No paper was parsed and no embedding model was run, so the embedding views of the affinity are missing.</li>
-        <li><b>Written by a model after the computation</b>, as the naming stage would: theme names, names for gradient ends, the relation lines for the DINOv3 map, expedition texts.</li>
+        <li><b>Parsed from the papers</b>: titles, authors, dates, reference lists, and the sentences that cite each reference. References shared by many papers become foundation tiles.</li>
+        <li><b>Extracted by a model</b> (gemini-3.8-flash, one call per paper): tile labels, summaries, concept lists, and whether a citation builds on, uses or compares against the cited work. Concept synonyms are merged in one further call. No embedding model was run, so the embedding views of the affinity are missing.</li>
+        <li><b>Written by a model after the computation</b>, as the naming stage would: theme names, names for gradient ends, the relation lines to the centre paper, expeditions and open questions.</li>
       </ul>
-      <p className="out" style={{ marginTop: 14 }}><a href="https://claude.ai/artifact/Hf3LAp1hZhq7sL6hxZ4wTg" target="_blank" rel="noopener">Read the Method spec for the full pipeline</a></p>
+      <p style={{ marginTop: 10 }}>Built {META.built}.</p>
     </div>
   );
 }

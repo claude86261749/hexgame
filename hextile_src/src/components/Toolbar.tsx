@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { SheetMode } from '../game/state';
+import { EXPLAINER } from '../data/corpus';
 import { WORLD } from '../world/world';
 import { useGame } from './context';
 
@@ -36,6 +37,12 @@ export function Toolbar({ sheet, toggleSheet, recenter, toggleTrails, liftFog, r
   );
   return (
     <div className="tools" role="toolbar" aria-label="Map controls">
+      {/* the switch between the two views of the corpus, shared with the diagram explainer (same markup and class names) */}
+      <nav className="suite" aria-label="Views">
+        <a href="./" aria-current="page"><i className="suite-hx" />Map</a>
+        <a href={EXPLAINER + '#/'}><i className="suite-dg" />Diagrams</a>
+      </nav>
+      <span className="gap" aria-hidden="true" />
       {modeButton('exp', 'Expeditions', `${nexp}/${WORLD.expeditions.length}`)}
       {modeButton('log', 'Log', `${nread}/${WORLD.papers.length}`)}
       {modeButton('grad', 'Gradients')}

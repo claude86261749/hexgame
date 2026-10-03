@@ -3,7 +3,10 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from 
 import { join } from 'node:path';
 
 export const DATA = process.env.DATA_DIR || join(process.cwd(), 'data');
-const P = (id: string, ...f: string[]) => join(DATA, 'papers', id, ...f);
+const P = (id: string, ...f: string[]) => {
+  if (!/^[\w-]+$/.test(id)) throw new Error(`bad paper id ${JSON.stringify(id)}`);
+  return join(DATA, 'papers', id, ...f);
+};
 
 export function put(id: string, file: string, v: unknown) {
   mkdirSync(P(id, file.includes('/') ? file.split('/')[0] : ''), { recursive: true });

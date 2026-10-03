@@ -1,3 +1,4 @@
+import { META } from '../data/corpus';
 import { hexDist } from '../engine';
 import { getMapView } from '../world/mapView';
 import { WORLD } from '../world/world';
@@ -28,7 +29,7 @@ export interface GameState {
 export type SheetMode = 'paper' | 'exp' | 'log' | 'grad' | 'rep';
 export interface ToastEvent { title: string; text: string; mode: SheetMode }
 
-export const START = 'dinov3';
+export const START = META.centre;
 const W = WORLD;
 
 function reveal(s: GameState, id: string, at: number) {
@@ -132,7 +133,8 @@ function checkProgress(s: GameState): { state: GameState; toasts: ToastEvent[] }
 }
 
 /* ───────────── persistence ───────────── */
-const SAVE_KEY = 'hextile.related-work.dinov3.v1';
+/* one save per corpus build: a rebuilt corpus can move every tile */
+const SAVE_KEY = `hextile.${META.source}.${META.centre}.${META.built}.v2`;
 
 interface Saved {
   cur: string; focal: string; steps: number; done: Record<string, 1>; reg: Record<number, 1>;

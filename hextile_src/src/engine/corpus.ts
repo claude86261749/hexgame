@@ -1,5 +1,5 @@
 import { CFG } from './config';
-import { cosSparse, jacobi, normSparse, type Sparse } from './math';
+import { cosSparse, normSparse, topEigs, type Sparse } from './math';
 
 /** What the engine needs from a paper. */
 export interface CorpusPaper {
@@ -105,13 +105,14 @@ export function buildIndex(papers: CorpusPaper[]): CorpusIndex {
 
   /* sparse neighbour graph, with a thin all-pairs glue so it stays connected */
   const nbr = Araw.map((row, i) => [...row.keys()].filter(j => j !== i).sort((a, b) => row[b] - row[a]));
-  const W = A.map(r => Array.from(r, x => x * CFG.glue));
+  /* the floor keeps a paper that shares nothing with the rest attached to the graph */
+  const W = A.map((r, i) => Array.from(r, (x, j) => (i === j ? 0 : x * CFG.glue + 1e-6)));
   for (let i = 0; i < N; i++) for (const j of nbr[i].slice(0, CFG.knn)) W[i][j] = W[j][i] = A[i][j];
 
   /* diffusion map: eigenvectors of the normalised graph are the gradients, ranked by eigenvalue */
   const d = W.map(r => r.reduce((s, x) => s + x, 0));
   const S = W.map((r, i) => r.map((x, j) => x / Math.sqrt(d[i] * d[j])));
-  const eig = jacobi(S);
+  const eig = topEigs(S, CFG.comps + 1);
   const grads: Gradient[] = [];
   for (let k = 1; k <= CFG.comps; k++) {
     const lam = eig.values[k], vec = eig.vectors[k].map((x, i) => x / Math.sqrt(d[i]));

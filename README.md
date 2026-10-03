@@ -4,7 +4,17 @@ Turn any research paper (as Markdown) into a short sequence of interactive diagr
 
 The DINOv3 prototype this grew from is the design reference. Everything paper-specific is now generated.
 
-> This repository holds two independent projects. This README covers the paper-diagrams app at the root. `hextile_src/` is a separate React project (the Related Work hex-crawl) with its own `package.json` and README; install, run and test it from inside that folder. Neither project imports from the other.
+> This repository holds two connected projects. This README covers the paper-diagrams app at the root. `hextile_src/` is the hex map of a corpus (its own `package.json` and README). Each paper on the map has **Explain it in diagrams**, which opens `#/arxiv/<id>` here; the explainer links back to the map. Both share the accent, fonts and the Map | Diagrams switch.
+
+## The map and the explainer together
+
+```bash
+npx tsx scripts/hexcorpus.ts <dir of arXiv .md> --name "cs.IR, September 2026"   # → hextile_src/src/data/corpus.json (Gemini)
+npm run build && (cd hextile_src && npx vite build)
+NODE_ENV=production PUBLIC=1 CORPUS_DIR=<dir of arXiv .md> npm start              # / = explainer, /map/ = hex map
+```
+
+`PUBLIC=1` turns off uploads and samples; diagrams are generated only for papers in `CORPUS_DIR`, the first time someone opens one (`GEN_PER_HOUR`, default 12). `LIVE=0` turns off the live guide (`LIVE_PER_HOUR`, default 30).
 
 ## Run it
 

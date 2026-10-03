@@ -7,10 +7,14 @@ async function j<T>(r: Response): Promise<T> {
 }
 const post = (url: string, body: unknown) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
-export interface PaperCard { id: string; title: string; full?: string; field?: string; gist?: string; stage: string; sessions: number }
+export interface PaperCard { id: string; title: string; full?: string; field?: string; gist?: string; stage: string; sessions: number; arxiv?: string }
+export interface SiteConfig { uploads: boolean; live: boolean; map: string; corpus: boolean }
 export interface SessionCard { id: string; startedAt: string; duration: number; title?: string; questions: string[] }
 
+let _config: Promise<SiteConfig> | null = null;
 export const api = {
+  config: () => (_config ??= fetch('/api/config').then(r => j<SiteConfig>(r)).catch(() => ({ uploads: true, live: true, map: '', corpus: false }))),
+  arxiv: (aid: string) => fetch(`/api/arxiv/${aid}`, { method: 'POST' }).then(r => j<{ id: string }>(r)),
   papers: () => fetch('/api/papers').then(r => j<PaperCard[]>(r)),
   samples: () => fetch('/api/samples').then(r => j<string[]>(r)),
   ingestSample: (name: string) => fetch(`/api/samples/${encodeURIComponent(name)}`, { method: 'POST' }).then(r => j<{ id: string }>(r)),

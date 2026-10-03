@@ -30,6 +30,6 @@ export function MapCanvas({ events, controller, ...props }: Props) {
 
   return (
     <canvas ref={canvas} className="map-canvas" tabIndex={0}
-      aria-label="Hex map of the literature around DINOv3. Coloured tiles are papers you have read, grey tiles are revealed but unread, blank tiles are uncharted. Papers can also be reached from the Log." />
+      aria-label="Hex map of a corpus of papers. Coloured tiles are papers you have read, grey tiles are revealed but unread, blank tiles are uncharted. Papers can also be reached from the Log." />
   );
 }

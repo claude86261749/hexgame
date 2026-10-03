@@ -7,6 +7,7 @@
   --mark:#c24a12; --mark-fill:#ffe2a8; --ok:#1f7a4a; --err:#b42318;
   --t-lineage:#6fd39a; --t-component:#f3c64b; --t-compare:#f28b70; --t-down:#7cc4f0; --on-tile:#141824;
   --img-a:#bcd9f5; --img-b:#e9a15d; --img-c:#5fae7a; --img-d:#cdbd8a;
+  --suite-bg:var(--sheet); --suite-line:var(--line-2); --on-accent:#ffffff;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -14,14 +15,14 @@
     --bg:#12141c; --sheet:#1a1d2a; --ink:#eceef6; --ink-2:#c3c8d8; --muted:#959cb3;
     --line:#272c3f; --line-2:#3d4461; --accent:#a79dff; --accent-soft:rgba(167,157,255,.14); --hover:rgba(236,238,246,.06);
     --mark:#ffa24d; --mark-fill:#5a3a12; --ok:#5fd394; --err:#ff8a7a;
-    --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460; color-scheme:dark;
+    --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460; --on-accent:#12141c; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#12141c; --sheet:#1a1d2a; --ink:#eceef6; --ink-2:#c3c8d8; --muted:#959cb3;
   --line:#272c3f; --line-2:#3d4461; --accent:#a79dff; --accent-soft:rgba(167,157,255,.14); --hover:rgba(236,238,246,.06);
   --mark:#ffa24d; --mark-fill:#5a3a12; --ok:#5fd394; --err:#ff8a7a;
-  --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460; color-scheme:dark;
+  --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460; --on-accent:#12141c; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -278,3 +279,16 @@ a{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+
+/* The switch between the map and the diagram explainer. The same block is in web/src/styles.css and
+   hextile_src/src/styles.css, so the two apps share it; each defines --suite-bg, --suite-line and --on-accent. */
+.suite{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--suite-line);border-radius:999px;background:var(--suite-bg);font:600 12.5px/1 "Schibsted Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.01em;white-space:nowrap}
+.suite a{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 9px;border-radius:999px;color:var(--ink-2);text-decoration:none}
+.suite a:hover{color:var(--ink);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.suite a[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+.suite i{display:inline-block;flex:none;width:11px;height:10px;background:currentColor}
+.suite .suite-hx{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.suite .suite-dg{border-radius:2px;-webkit-mask:linear-gradient(currentColor 0 0) 0 0/100% 2px no-repeat,linear-gradient(currentColor 0 0) 0 4px/70% 2px no-repeat,linear-gradient(currentColor 0 0) 0 8px/85% 2px no-repeat;mask:linear-gradient(#000 0 0) 0 0/100% 2px no-repeat,linear-gradient(#000 0 0) 0 4px/70% 2px no-repeat,linear-gradient(#000 0 0) 0 8px/85% 2px no-repeat}
+.crumb .suite{margin-right:10px}
+.home > .suite,.progress > .suite{margin-bottom:18px}
+.toc .off{margin:0 8px;color:var(--muted);font-size:12.5px}

@@ -12,11 +12,17 @@ import type { GameState, SheetMode, ToastEvent } from './game/state';
 import { getMapView } from './world/mapView';
 import { WORLD } from './world/world';
 
+/** The paper named in the URL hash, if it is on the map. */
+const linked = () => { const id = decodeURIComponent(location.hash.slice(1)); return WORLD.byId[id] ? id : null; };
+
 /** Q W E A S D: indices into DIRS, the six flat-top neighbours. */
 const KEYDIR: Record<string, number> = { w: 2, e: 1, d: 0, s: 5, a: 4, q: 3 };
 
 export function App() {
-  const [game, setGame] = useState<GameState>(() => G.load() ?? G.freshGame(performance.now()));
+  const [game, setGame] = useState<GameState>(() => {
+    const s = G.load() ?? G.freshGame(performance.now()), id = linked();
+    return id && id !== s.cur ? G.arrive(s, id, performance.now()) : s;
+  });
   const [epoch, setEpoch] = useState(0);
   const [sheet, setSheet] = useState<SheetMode | null>(null);
   const [pop, setPop] = useState(0);
@@ -74,6 +80,20 @@ export function App() {
     setSheet(null);
     setEpoch(e => e + 1);
   };
+
+  /* a link from the explainer (map/#<arXiv id>) opens that paper; later changes of the hash walk there */
+  useEffect(() => {
+    if (linked()) openSheet('paper');
+    const on = () => {
+      const id = linked();
+      if (!id || id === gameRef.current.cur) return;
+      apply(s => G.arrive(s, id, performance.now()));
+      openSheet('paper');
+      requestAnimationFrame(() => ctl.current?.focusOn(id, true));
+    };
+    addEventListener('hashchange', on);
+    return () => removeEventListener('hashchange', on);
+  }, [apply, openSheet]);
 
   /* keys anywhere on the page: walk, read, close */
   const onKey = useRef<(e: KeyboardEvent) => void>(() => {});

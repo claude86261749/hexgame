@@ -1,3 +1,4 @@
+import { META } from '../data/corpus';
 import { WORLD } from '../world/world';
 import { css } from '../world/colour';
 import { Hx } from './bits';
@@ -14,8 +15,8 @@ export function Hud() {
   const { view } = useGame();
   return (
     <header className="hud glass">
-      <h1><span className="secno">2</span>Related Work</h1>
-      <p className="sub">A hex-crawl through the literature around {view.focal.s}</p>
+      <h1>{META.title}</h1>
+      <p className="sub">{META.papers} {META.name || 'papers'} on arXiv and the {META.foundations} works they share, around {view.focal.s}</p>
       <p className="stats" aria-live="polite"><Stats /></p>
     </header>
   );

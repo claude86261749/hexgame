@@ -1,11 +1,14 @@
 /* Tokens. Colour on the map means one thing only: a paper you have read.
-   Everything else is blank paper (uncharted) or plaster grey (revealed). */
+   Everything else is blank paper (uncharted) or plaster grey (revealed).
+   The accent, the serif and the UI sans are shared with the diagram explainer (web/src/styles.css);
+   tile labels on the canvas keep a condensed face (canvas/draw.ts). */
 :root{
   --sea:#E4E9EF; --fog:#F8F9FB; --fog-line:#AEB8C6; --rev:#C5CCD7; --shade:#15233B;
   --panel:#FFFFFF; --panel-2:#F2F4F8; --ink:#15233B; --ink-2:#5B6880; --line:#D8DDE6;
-  --accent:#B81F68; --pill:#FFFFFF;
+  --accent:#3B2FD6; --pill:#FFFFFF; --on-accent:#FFFFFF;
+  --suite-bg:var(--panel); --suite-line:var(--line);
   --serif:"STIX Two Text","Times New Roman",Times,serif;
-  --sans:"IBM Plex Sans Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --sans:"Schibsted Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -14,13 +17,13 @@
   :root:not([data-theme="light"]){
     --sea:#111925; --fog:#1A2330; --fog-line:#3B4A60; --rev:#3A485D; --shade:#04070D;
     --panel:#161F2C; --panel-2:#1E2938; --ink:#E9EDF4; --ink-2:#9CA9BB; --line:#2C394A;
-    --accent:#FF86BC; --pill:#0E151F;
+    --accent:#A79DFF; --pill:#0E151F; --on-accent:#111925;
   }
 }
 :root[data-theme="dark"]{
   --sea:#111925; --fog:#1A2330; --fog-line:#3B4A60; --rev:#3A485D; --shade:#04070D;
   --panel:#161F2C; --panel-2:#1E2938; --ink:#E9EDF4; --ink-2:#9CA9BB; --line:#2C394A;
-  --accent:#FF86BC; --pill:#0E151F;
+  --accent:#A79DFF; --pill:#0E151F; --on-accent:#111925;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -221,3 +224,19 @@ kbd{font:inherit;font-weight:600;border:1px solid var(--line);border-bottom-widt
   .sheet-body{padding:16px 18px 18px}
   .paper-head h2{font-size:20px}
 }
+
+/* The switch between the map and the diagram explainer. The same block is in web/src/styles.css and
+   hextile_src/src/styles.css, so the two apps share it; each defines --suite-bg, --suite-line and --on-accent. */
+.suite{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--suite-line);border-radius:999px;background:var(--suite-bg);font:600 12.5px/1 "Schibsted Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.01em;white-space:nowrap}
+.suite a{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 9px;border-radius:999px;color:var(--ink-2);text-decoration:none}
+.suite a:hover{color:var(--ink);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.suite a[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+.suite i{display:inline-block;flex:none;width:11px;height:10px;background:currentColor}
+.suite .suite-hx{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.suite .suite-dg{border-radius:2px;-webkit-mask:linear-gradient(currentColor 0 0) 0 0/100% 2px no-repeat,linear-gradient(currentColor 0 0) 0 4px/70% 2px no-repeat,linear-gradient(currentColor 0 0) 0 8px/85% 2px no-repeat;mask:linear-gradient(#000 0 0) 0 0/100% 2px no-repeat,linear-gradient(#000 0 0) 0 4px/70% 2px no-repeat,linear-gradient(#000 0 0) 0 8px/85% 2px no-repeat}
+.tools .suite{margin-right:2px}
+.tools .suite a{font-size:12.5px}
+.out.explain{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.out.explain .go{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:var(--on-accent);border-radius:8px;padding:8px 14px;font-weight:600;text-decoration:none}
+.out.explain .go::before{content:"";width:11px;height:10px;background:currentColor;-webkit-mask:linear-gradient(#000 0 0) 0 0/100% 2px no-repeat,linear-gradient(#000 0 0) 0 4px/70% 2px no-repeat,linear-gradient(#000 0 0) 0 8px/85% 2px no-repeat;mask:linear-gradient(#000 0 0) 0 0/100% 2px no-repeat,linear-gradient(#000 0 0) 0 4px/70% 2px no-repeat,linear-gradient(#000 0 0) 0 8px/85% 2px no-repeat}
+.out.explain .go:hover{filter:brightness(1.1)}

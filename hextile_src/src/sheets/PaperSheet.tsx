@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { ArrowIcon, Chip, Chips, DashIcon, Hx, More } from '../components/bits';
 import { useGame } from '../components/context';
+import { META, explainerUrl } from '../data/corpus';
 import { START } from '../game/state';
 import { ELEV, bearingLine, byYear, closest, evidence, paperById, plural, themeLine } from '../game/text';
 import { css, lum } from '../world/colour';
@@ -118,13 +119,13 @@ function Trails({ t }: { t: PaperTile }) {
 export function PaperBody({ t }: { t: PaperTile }) {
   const { game, view, refocus } = useGame();
   const focal = view.focal;
-  const venue = /\d/.test(t.v) ? t.v : t.v + ' ' + t.y;
+  const venue = t.ext ? `${t.v} ${t.y} · cited by ${plural(t.cited || 0, 'paper')} on this map` : t.arxiv ? `arXiv ${t.arxiv}${t.date ? ` · ${t.date}` : ''}` : /\d/.test(t.v) ? t.v : t.v + ' ' + t.y;
   const elev = t.tooNew ? 'Too new to tell: elevation counts who builds on a paper, and nothing here has had time to.' : `Elevation ${t.e} of 5. ${ELEV[t.e]}`;
   return (
     <>
       {game.steps === 0 && t.id === START && (
         <div className="preface">
-          <p>You have just put down the DINOv3 paper, so its tile is the only one in colour.</p>
+          <p>{META.intro} The map starts at {t.s}, the paper with the most in common with the rest, and its tile is the only one in colour.</p>
           <p>Walking onto a tile shows the landscape around it in grey. A tile is painted only when you mark its paper as read, and reading is also what brings in the papers it builds on.</p>
         </div>
       )}
@@ -141,7 +142,7 @@ export function PaperBody({ t }: { t: PaperTile }) {
         </ul>
         <p className="body"><b>The idea.</b> {t.idea}</p>
         {focal.id === START && t.link
-          ? <p className="body"><b>Why it is on this map.</b> {t.link}</p>
+          ? <p className="body"><b>{t.ext ? 'Why it is on this map' : `Relation to ${focal.s}`}.</b> {t.link}</p>
           : t === focal
             ? <p className="body"><b>Why it is at the centre.</b> You rebuilt the map around it. Every other paper is now placed by how far it is from this one.</p>
             : <p className="body"><b>Relation to {focal.s}.</b> {evidence(t, focal)}</p>}
@@ -156,9 +157,14 @@ export function PaperBody({ t }: { t: PaperTile }) {
               Same index, different map: distances and layout are recomputed from {t.s}. Themes, gradients and what you have read stay as they are.
             </div>
           )}
-        <p className="out"><a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(t.t)}`} target="_blank" rel="noopener">Find this paper on Google Scholar</a></p>
+        {t.arxiv
+          ? <p className="out explain"><a className="go" href={explainerUrl(t.arxiv)}>Explain it in diagrams</a>
+              <a href={`https://arxiv.org/abs/${t.arxiv}`} target="_blank" rel="noopener">arXiv {t.arxiv}</a></p>
+          : <p className="out"><a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(t.t)}`} target="_blank" rel="noopener">Find this paper on Google Scholar</a></p>}
       </article>
-      <p className="fine">Summaries, concept lists and citation classes are hand-written stand-ins for what the pipeline would extract. Positions, colours, themes, elevations and closest papers are computed from them in your browser. Check the paper before you cite it.</p>
+      <p className="fine">{t.ext
+        ? `A foundation: not in the corpus, but cited by at least ${META.minShared} of its papers. Title, venue and summary are written by a model from the citation strings and citing sentences.`
+        : 'The summary, concepts and citation classes are extracted by a model from the paper\'s text.'} Positions, colours, themes, elevations and closest papers are computed from them in your browser. Check the paper before you cite it.</p>
     </>
   );
 }

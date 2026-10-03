@@ -7,6 +7,7 @@ import { Stage } from './diagram/Stage';
 import type { Guide, GuideStatus } from './live/guide';
 import { api, type SessionCard } from './api';
 import { Icon } from './icons';
+import { Suite, useConfig } from './suite';
 
 const fmt = (s: number) => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const REL: Record<string, { name: string; gloss: (p: string) => string }> = {
@@ -19,6 +20,7 @@ interface Replay { log: SessionLog; T: number; playing: boolean; speed: number }
 
 export function Reader({ b }: { b: PaperBundle }) {
   const G = b.diagrams, short = b.digest?.shortTitle || b.doc.title;
+  const liveOn = useConfig()?.live !== false;
   const [view, setView] = useState<View>({ kind: 'g', id: G[0]?.id });
   const [sel, setSel] = useState<Record<string, string | null>>(() => Object.fromEntries(G.map(d => [d.id, defaultPart(d)])));
   const [xs, setXs] = useState<Record<string, number>>({});
@@ -200,7 +202,7 @@ export function Reader({ b }: { b: PaperBundle }) {
   return <div className="app">
     <header className="paper">
       <div>
-        <div className="crumb"><a href="#/">Library</a> / {b.digest?.field || 'Paper'} / this paper</div>
+        <div className="crumb"><Suite here="diagrams" aid={b.doc.arxiv} /><a href="#/">Library</a> / {b.digest?.field || 'Paper'} / this paper</div>
         <h1>{short}</h1>
         <p className="by">{b.digest?.byline}{b.doc.arxiv && <> <a href={`https://arxiv.org/abs/${b.doc.arxiv}`} target="_blank" rel="noopener noreferrer">Open arXiv {b.doc.arxiv}</a></>}</p>
       </div>
@@ -220,7 +222,7 @@ export function Reader({ b }: { b: PaperBundle }) {
         </div>}
         <div className="grp">
           <h2>Talk it through</h2>
-          {!guide.current
+          {!liveOn ? <p className="off">The live guide is off on this site. Recorded sessions still play.</p> : !guide.current
             ? <button className="sessbtn" onClick={() => startGuide(true)}>{Icon.mic}<span>Talk to the guide<small>voice; or type below</small></span></button>
             : <button className="sessbtn on" onClick={stopGuide}>{Icon.close}<span>End the session<small>{status.s}{status.msg ? `: ${status.msg}` : ''}</small></span></button>}
           {sessions.map(s => <button key={s.id} className={'sessbtn' + (replay?.log.id === s.id ? ' on' : '')} onClick={() => replay?.log.id === s.id ? setReplay(null) : openReplay(s.id)}>
@@ -238,7 +240,7 @@ export function Reader({ b }: { b: PaperBundle }) {
           <button className="tab" role="tab" aria-selected={tab === 'guide'} onClick={() => setTab('guide')}>{replay ? 'Recorded session' : 'Guide'}{live && <span className="live" />}</button>
         </div>
         <div className="sidebody">{tab === 'read' ? readPanel : guidePanel}</div>
-        {!replay && <Composer live={live} mic={mic} muted={muted} level={level} speaking={speaking} status={status}
+        {!replay && liveOn && <Composer live={live} mic={mic} muted={muted} level={level} speaking={speaking} status={status}
           onSend={t => { if (guide.current) guide.current.sendText(t); else startGuide(false).then(() => guide.current?.sendText(t)); setTab('guide'); }}
           onMic={toggleMic} onMute={() => { setMuted(m => { guide.current?.setMuted(!m); return !m; }); }}
           phones={phones} onPhones={() => setPhones(p => { guide.current?.setHeadphones(!p); return !p; })}

@@ -31,6 +31,38 @@ export function jacobi(S: ArrayLike<number>[]): { values: number[]; vectors: num
   return { values: order.map(i => A[i][i]), vectors: order.map(i => V.map(r => r[i])) };
 }
 
+/** The k largest eigenpairs of a symmetric matrix by subspace iteration with Rayleigh-Ritz:
+ *  O(n^2 k) per step instead of Jacobi's O(n^3) per sweep, for maps with a few hundred papers.
+ *  The matrix is shifted by +1 so that eigenvalues in [-1, 1] (a normalised affinity) are all positive. */
+export function topEigs(S: ArrayLike<number>[], k: number, iters = 150): { values: number[]; vectors: number[][] } {
+  const n = S.length, b = Math.min(n, k + 8);
+  let seed = 12345;
+  const rnd = () => ((seed = Math.imul(seed ^ (seed >>> 15), 2246822519) + 0x9e3779b9 | 0) >>> 0) / 4294967296 - 0.5;
+  let Q: Float64Array[] = Array.from({ length: b }, () => Float64Array.from({ length: n }, rnd));
+  const orth = (V: Float64Array[]) => {
+    for (let a = 0; a < V.length; a++) {
+      for (let c = 0; c < a; c++) { let d = 0; for (let i = 0; i < n; i++) d += V[a][i] * V[c][i]; for (let i = 0; i < n; i++) V[a][i] -= d * V[c][i]; }
+      let nn = 0; for (let i = 0; i < n; i++) nn += V[a][i] * V[a][i];
+      nn = Math.sqrt(nn) || 1; for (let i = 0; i < n; i++) V[a][i] /= nn;
+    }
+    return V;
+  };
+  const mul = (v: Float64Array, shift: number) => {
+    const out = new Float64Array(n);
+    for (let i = 0; i < n; i++) { const r = S[i]; let x = shift * v[i]; for (let j = 0; j < n; j++) x += r[j] * v[j]; out[i] = x; }
+    return out;
+  };
+  Q = orth(Q);
+  for (let it = 0; it < iters; it++) Q = orth(Q.map(v => mul(v, 1)));
+  /* Rayleigh-Ritz on the subspace */
+  const SQ = Q.map(v => mul(v, 0));
+  const T = Q.map(u => SQ.map(w => { let d = 0; for (let i = 0; i < n; i++) d += u[i] * w[i]; return d; }));
+  for (let a = 0; a < b; a++) for (let c = a + 1; c < b; c++) T[a][c] = T[c][a] = (T[a][c] + T[c][a]) / 2;
+  const e = jacobi(T);
+  const vectors = e.vectors.slice(0, k).map(y => { const v = new Array<number>(n).fill(0); y.forEach((w, a) => { for (let i = 0; i < n; i++) v[i] += w * Q[a][i]; }); return v; });
+  return { values: e.values.slice(0, k), vectors };
+}
+
 /** Minimum-cost assignment of n rows to m >= n columns (Hungarian, O(n^2 m)).
  *  Returns, for each row, the column it gets. */
 export function assign(cost: ArrayLike<number>[]): Int32Array {
