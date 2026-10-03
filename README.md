@@ -4,6 +4,8 @@ Turn any research paper (as Markdown) into a short sequence of interactive diagr
 
 The DINOv3 prototype this grew from is the design reference. Everything paper-specific is now generated.
 
+> This repository holds two independent projects. This README covers the paper-diagrams app at the root. `hextile_src/` is a separate React project (the Related Work hex-crawl) with its own `package.json` and README; install, run and test it from inside that folder. Neither project imports from the other.
+
 ## Run it
 
 ```bash
