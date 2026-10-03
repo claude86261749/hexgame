@@ -29,7 +29,7 @@ export function Reader({ b }: { b: PaperBundle }) {
   const [gstate, setGstate] = useState<GuideState>(emptyGuide());
   const [events, setEvents] = useState<SessionEvent[]>([]);
   const [status, setStatus] = useState<{ s: GuideStatus; msg?: string }>({ s: 'idle' });
-  const [mic, setMic] = useState(false), [muted, setMuted] = useState(false), [level, setLevel] = useState(0), [speaking, setSpeaking] = useState(false);
+  const [mic, setMic] = useState(false), [muted, setMuted] = useState(false), [phones, setPhones] = useState(false), [level, setLevel] = useState(0), [speaking, setSpeaking] = useState(false);
   // replay
   const [sessions, setSessions] = useState<SessionCard[]>([]);
   const [replay, setReplay] = useState<Replay | null>(null);
@@ -37,6 +37,11 @@ export function Reader({ b }: { b: PaperBundle }) {
 
   useEffect(() => { api.sessions(b.id).then(setSessions).catch(() => {}); }, [b.id]);
   useEffect(() => () => { guide.current?.stop(); }, []);
+  // Esc cuts the guide off mid-sentence (reliable even on loud speakers, where talking over it may not register)
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => { if (e.key === 'Escape' && guide.current) { guide.current.interrupt(); setSpeaking(false); } };
+    addEventListener('keydown', on); return () => removeEventListener('keydown', on);
+  }, []);
 
   /* ------------- what state drives the screen: replay (folded at T) or live/last live */
   const replayState = useMemo(() => replay ? foldEvents(replay.log.events, replay.T) : null, [replay?.log, replay?.T]);
@@ -65,9 +70,10 @@ export function Reader({ b }: { b: PaperBundle }) {
       onLevel: setLevel, onSpeaking: setSpeaking,
     });
     guide.current = g;
+    g.setHeadphones(phones);
     try { await g.start({ voice }); setMic(voice); }
     catch (e: any) { setStatus({ s: 'error', msg: String(e?.message || e) }); guide.current = null; }
-  }, [b.id, G]);
+  }, [b.id, G, phones]);
   const stopGuide = useCallback(async () => {
     const g = guide.current; if (!g) return;
     guide.current = null; setMic(false);
@@ -126,7 +132,14 @@ export function Reader({ b }: { b: PaperBundle }) {
     if (view.kind === 'c' && custom) return <div className="read">
       <h2>{custom.head}</h2>
       <p className="hint" style={{ marginTop: 0 }}><i />You asked: “{custom.question}”</p>
-      {custom.summary ? <p style={{ marginTop: 10 }}>{custom.summary}</p> : <p className="hint">The guide is still answering.</p>}
+      {custom.summary ? <p style={{ marginTop: 10 }}>{custom.summary}</p> : (() => {
+        // no summary yet: show what the guide said while building this diagram
+        const evs = replay ? replay.log.events : events;
+        const start = evs.find(e => e.kind === 'tool' && e.name === 'start_custom' && (e.result as any)?.custom_id === custom.id)?.t;
+        const next = start == null ? undefined : evs.find(e => e.t > start && e.kind === 'tool' && e.name === 'start_custom' && !(e.result as any)?.error)?.t;
+        const said = start == null ? '' : evs.filter(e => e.kind === 'guide' && e.t >= start && (next == null || e.t < next) && (!replay || e.t <= replay.T)).map(e => (e as any).text).join('').trim();
+        return said ? <p style={{ marginTop: 10 }}>{said}</p> : <p className="hint">The guide is still answering.</p>;
+      })()}
     </div>;
     const d = G[gi]; if (!d) return null;
     const pid = sel[d.id];
@@ -227,7 +240,9 @@ export function Reader({ b }: { b: PaperBundle }) {
         <div className="sidebody">{tab === 'read' ? readPanel : guidePanel}</div>
         {!replay && <Composer live={live} mic={mic} muted={muted} level={level} speaking={speaking} status={status}
           onSend={t => { if (guide.current) guide.current.sendText(t); else startGuide(false).then(() => guide.current?.sendText(t)); setTab('guide'); }}
-          onMic={toggleMic} onMute={() => { setMuted(m => { guide.current?.setMuted(!m); return !m; }); }} />}
+          onMic={toggleMic} onMute={() => { setMuted(m => { guide.current?.setMuted(!m); return !m; }); }}
+          phones={phones} onPhones={() => setPhones(p => { guide.current?.setHeadphones(!p); return !p; })}
+          onStop={() => { guide.current?.interrupt(); setSpeaking(false); }} />}
       </aside>
     </div>
   </div>;
@@ -282,7 +297,7 @@ function Track({ T, total, cuts, onSeek }: { T: number; total: number; cuts: num
   </div>;
 }
 
-function Composer(p: { live: boolean; mic: boolean; muted: boolean; level: number; speaking: boolean; status: { s: GuideStatus; msg?: string }; onSend: (t: string) => void; onMic: () => void; onMute: () => void }) {
+function Composer(p: { onStop: () => void; phones: boolean; onPhones: () => void; live: boolean; mic: boolean; muted: boolean; level: number; speaking: boolean; status: { s: GuideStatus; msg?: string }; onSend: (t: string) => void; onMic: () => void; onMute: () => void }) {
   const [text, setText] = useState('');
   return <div className="composer">
     <form onSubmit={e => { e.preventDefault(); if (text.trim()) { p.onSend(text.trim()); setText(''); } }}>
@@ -291,8 +306,9 @@ function Composer(p: { live: boolean; mic: boolean; muted: boolean; level: numbe
       <button className="btn" type="submit" disabled={!text.trim()}>Ask</button>
     </form>
     <div className="status">
-      <span>{p.status.s === 'error' ? <span className="err">{p.status.msg}</span> : p.live ? (p.speaking ? 'Guide is speaking' : p.mic ? 'Listening' : 'Connected, microphone off') : 'The guide uses your microphone, or you can type.'}</span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{p.mic && <span className="level"><b style={{ width: Math.min(100, p.level * 300) + '%' }} /></span>}
+      <span>{p.status.s === 'error' ? <span className="err">{p.status.msg}</span> : p.live ? (p.speaking ? <>Guide is speaking · <button className="linkbtn" type="button" onClick={p.onStop}>Stop</button> (Esc)</> : p.mic ? 'Listening' : 'Connected, microphone off') : 'The guide uses your microphone, or you can type.'}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{p.mic && <span className="level"><b style={{ width: Math.min(100, p.level * 600) + '%' }} /></span>}
+        <label title="With headphones you can talk over the guide at any time. On speakers, the guide stops listening while it talks unless you speak up clearly." style={{ display: 'inline-flex', gap: 4, alignItems: 'center', cursor: 'pointer' }}><input type="checkbox" checked={p.phones} onChange={p.onPhones} />Headphones</label>
         {p.live && <button className="linkbtn" type="button" onClick={p.onMute}>{p.muted ? 'Unmute voice' : 'Mute voice'}</button>}</span>
     </div>
   </div>;

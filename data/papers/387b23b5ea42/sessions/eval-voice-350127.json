@@ -1,0 +1,852 @@
+{
+ "id": "eval-voice-350127",
+ "paperId": "387b23b5ea42",
+ "startedAt": "2026-10-03T16:09:28.771Z",
+ "duration": 225.374162671,
+ "events": [
+  {
+   "t": 1.1129528949999998,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g1"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 1.1217653810000001,
+   "kind": "turn"
+  },
+  {
+   "t": 6.829144007999999,
+   "kind": "guide",
+   "text": "Welcome. This "
+  },
+  {
+   "t": 7.110882772999999,
+   "kind": "guide",
+   "text": "paper introduces"
+  },
+  {
+   "t": 7.341785522,
+   "kind": "guide",
+   "text": " DINOv3,"
+  },
+  {
+   "t": 7.625042094,
+   "kind": "guide",
+   "text": " which scales self-supervised"
+  },
+  {
+   "t": 7.855395285999999,
+   "kind": "guide",
+   "text": " pre-training"
+  },
+  {
+   "t": 8.050509388999998,
+   "kind": "guide",
+   "text": " to a massive"
+  },
+  {
+   "t": 8.335559476999999,
+   "kind": "guide",
+   "text": " seven billion parameter"
+  },
+  {
+   "t": 8.561894455,
+   "kind": "guide",
+   "text": " Vision Transformer"
+  },
+  {
+   "t": 8.761218899,
+   "kind": "guide",
+   "text": " on nearly"
+  },
+  {
+   "t": 9.04519911,
+   "kind": "guide",
+   "text": " one point seven"
+  },
+  {
+   "t": 9.215852045,
+   "kind": "guide",
+   "text": " billion images."
+  },
+  {
+   "t": 9.472984075000001,
+   "kind": "guide",
+   "text": " What would you like to understand"
+  },
+  {
+   "t": 9.698985564000001,
+   "kind": "guide",
+   "text": " about this approach?"
+  },
+  {
+   "t": 20.609503056,
+   "kind": "turn"
+  },
+  {
+   "t": 26.428727156,
+   "kind": "you",
+   "text": "What problem is this paper trying to solve?"
+  },
+  {
+   "t": 26.803517114,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g2"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 26.820903789,
+   "kind": "turn"
+  },
+  {
+   "t": 32.668405887,
+   "kind": "guide",
+   "text": "The paper solves the "
+  },
+  {
+   "t": 33.005072861,
+   "kind": "guide",
+   "text": "problem where dense"
+  },
+  {
+   "t": 33.209294862,
+   "kind": "guide",
+   "text": " patch representations"
+  },
+  {
+   "t": 33.43848924500001,
+   "kind": "guide",
+   "text": " lose spatial"
+  },
+  {
+   "t": 33.634771218000004,
+   "kind": "guide",
+   "text": " precision during"
+  },
+  {
+   "t": 33.92227342,
+   "kind": "guide",
+   "text": " long self-supervised"
+  },
+  {
+   "t": 34.205623285,
+   "kind": "guide",
+   "text": " training. As"
+  },
+  {
+   "t": 34.403760072000004,
+   "kind": "guide",
+   "text": " you can see on the chart,"
+  },
+  {
+   "t": 34.663201963,
+   "kind": "guide",
+   "text": " global classification"
+  },
+  {
+   "t": 34.890050871,
+   "kind": "guide",
+   "text": " accuracy"
+  },
+  {
+   "t": 35.115760753,
+   "kind": "guide",
+   "text": " keeps improving while"
+  },
+  {
+   "t": 35.314771923,
+   "kind": "guide",
+   "text": " the dense segmentation"
+  },
+  {
+   "t": 35.542165066,
+   "kind": "guide",
+   "text": " probe peaks"
+  },
+  {
+   "t": 35.798375643,
+   "kind": "guide",
+   "text": " and falls."
+  },
+  {
+   "t": 47.204014577,
+   "kind": "turn"
+  },
+  {
+   "t": 52.888877608,
+   "kind": "you",
+   "text": "What is the One New Idea here?"
+  },
+  {
+   "t": 52.950111102,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g3"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 52.968283263000004,
+   "kind": "turn"
+  },
+  {
+   "t": 58.840318397000004,
+   "kind": "guide",
+   "text": "Gram anchoring "
+  },
+  {
+   "t": 59.097463771,
+   "kind": "guide",
+   "text": "penalizes changes"
+  },
+  {
+   "t": 59.351229111,
+   "kind": "guide",
+   "text": " in the Gram matrix"
+  },
+  {
+   "t": 59.576620278,
+   "kind": "guide",
+   "text": " of patch similarities"
+  },
+  {
+   "t": 59.780852184000004,
+   "kind": "guide",
+   "text": " relative to an earlier"
+  },
+  {
+   "t": 60.036387399,
+   "kind": "guide",
+   "text": " checkpoint."
+  },
+  {
+   "t": 60.264806009,
+   "kind": "guide",
+   "text": " This mechanism allows"
+  },
+  {
+   "t": 60.46488179,
+   "kind": "guide",
+   "text": " individual patch features"
+  },
+  {
+   "t": 60.745880319,
+   "kind": "guide",
+   "text": " to move while locking"
+  },
+  {
+   "t": 60.973677122,
+   "kind": "guide",
+   "text": " their pairwise similarity"
+  },
+  {
+   "t": 61.173458774,
+   "kind": "guide",
+   "text": " structure to that"
+  },
+  {
+   "t": 61.567433271,
+   "kind": "guide",
+   "text": " of an earlier model"
+  },
+  {
+   "t": 61.691463049999996,
+   "kind": "guide",
+   "text": " with clean dense maps."
+  },
+  {
+   "t": 73.65079009,
+   "kind": "turn"
+  },
+  {
+   "t": 78.880441286,
+   "kind": "you",
+   "text": "How is it different from Dino V2?"
+  },
+  {
+   "t": 79.33993744299998,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g5"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 79.359426883,
+   "kind": "turn"
+  },
+  {
+   "t": 84.89866817999999,
+   "kind": "guide",
+   "text": "DINOv3 builds on "
+  },
+  {
+   "t": 85.151065886,
+   "kind": "guide",
+   "text": "the architecture"
+  },
+  {
+   "t": 85.34910886499999,
+   "kind": "guide",
+   "text": " and loss formulation"
+  },
+  {
+   "t": 85.695811897,
+   "kind": "guide",
+   "text": " of DINOv2"
+  },
+  {
+   "t": 85.947176121,
+   "kind": "guide",
+   "text": " while extending"
+  },
+  {
+   "t": 86.174769777,
+   "kind": "guide",
+   "text": " the scale from one"
+  },
+  {
+   "t": 86.402362115,
+   "kind": "guide",
+   "text": " point one billion"
+  },
+  {
+   "t": 86.572808607,
+   "kind": "guide",
+   "text": " parameters to six"
+  },
+  {
+   "t": 86.88688572199999,
+   "kind": "guide",
+   "text": " point seven billion."
+  },
+  {
+   "t": 87.11459751599999,
+   "kind": "guide",
+   "text": " It introduces"
+  },
+  {
+   "t": 87.37080382199998,
+   "kind": "guide",
+   "text": " Gram anchoring to fix"
+  },
+  {
+   "t": 87.569762496,
+   "kind": "guide",
+   "text": " dense feature degradation"
+  },
+  {
+   "t": 87.76922873599999,
+   "kind": "guide",
+   "text": " and adds multi-student"
+  },
+  {
+   "t": 88.056567237,
+   "kind": "guide",
+   "text": " distillation"
+  },
+  {
+   "t": 88.283486184,
+   "kind": "guide",
+   "text": " for smaller models."
+  },
+  {
+   "t": 101.015831048,
+   "kind": "turn"
+  },
+  {
+   "t": 105.35070044399998,
+   "kind": "you",
+   "text": "Why did they need that?"
+  },
+  {
+   "t": 105.74422343,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g4"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 105.76536483199999,
+   "kind": "turn"
+  },
+  {
+   "t": 111.21615547,
+   "kind": "guide",
+   "text": "They used "
+  },
+  {
+   "t": 111.416649026,
+   "kind": "guide",
+   "text": "multi-student distillation"
+  },
+  {
+   "t": 111.672077358,
+   "kind": "guide",
+   "text": " to preserve both"
+  },
+  {
+   "t": 111.92823569999999,
+   "kind": "guide",
+   "text": " dense and global accuracy"
+  },
+  {
+   "t": 112.183043519,
+   "kind": "guide",
+   "text": " across various compute"
+  },
+  {
+   "t": 112.50268133799999,
+   "kind": "guide",
+   "text": " budgets while"
+  },
+  {
+   "t": 112.754479339,
+   "kind": "guide",
+   "text": " reducing inference"
+  },
+  {
+   "t": 112.953100735,
+   "kind": "guide",
+   "text": " costs. This process"
+  },
+  {
+   "t": 113.12422595599999,
+   "kind": "guide",
+   "text": " allows a frozen"
+  },
+  {
+   "t": 113.42517948999999,
+   "kind": "guide",
+   "text": " seven billion parameter"
+  },
+  {
+   "t": 113.606425545,
+   "kind": "guide",
+   "text": " teacher to train"
+  },
+  {
+   "t": 113.86202311499999,
+   "kind": "guide",
+   "text": " multiple smaller students"
+  },
+  {
+   "t": 114.06322564599999,
+   "kind": "guide",
+   "text": " simultaneously."
+  },
+  {
+   "t": 125.537774442,
+   "kind": "turn"
+  },
+  {
+   "t": 131.344237332,
+   "kind": "you",
+   "text": "What numbers from the results should I remember?"
+  },
+  {
+   "t": 131.69437448700003,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g5"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 131.712923501,
+   "kind": "turn"
+  },
+  {
+   "t": 137.22380525,
+   "kind": "guide",
+   "text": "DINOv3 reaches "
+  },
+  {
+   "t": 137.45135969700002,
+   "kind": "guide",
+   "text": "fifty-five"
+  },
+  {
+   "t": 137.70646428,
+   "kind": "guide",
+   "text": " point nine on ADE20k"
+  },
+  {
+   "t": 138.02008150600003,
+   "kind": "guide",
+   "text": " segmentation,"
+  },
+  {
+   "t": 138.224202063,
+   "kind": "guide",
+   "text": " which outperforms"
+  },
+  {
+   "t": 138.50600585200002,
+   "kind": "guide",
+   "text": " DINOv2."
+  },
+  {
+   "t": 138.705683663,
+   "kind": "guide",
+   "text": " It also achieves"
+  },
+  {
+   "t": 138.996193237,
+   "kind": "guide",
+   "text": " sixty-six point"
+  },
+  {
+   "t": 139.18929555500003,
+   "kind": "guide",
+   "text": " one on COCO object"
+  },
+  {
+   "t": 139.471312756,
+   "kind": "guide",
+   "text": " detection and eighty-eight"
+  },
+  {
+   "t": 139.669218029,
+   "kind": "guide",
+   "text": " point four percent"
+  },
+  {
+   "t": 139.87043654,
+   "kind": "guide",
+   "text": " on ImageNet linear probing."
+  },
+  {
+   "t": 150.44497959,
+   "kind": "turn"
+  },
+  {
+   "t": 156.700934948,
+   "kind": "you",
+   "text": "Can you walk me through the training pipeline in detail?"
+  },
+  {
+   "t": 156.92474898600003,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g1"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 156.944162622,
+   "kind": "turn"
+  },
+  {
+   "t": 162.602041961,
+   "kind": "guide",
+   "text": "The pipeline begins with "
+  },
+  {
+   "t": 162.886986951,
+   "kind": "guide",
+   "text": "curating a massive"
+  },
+  {
+   "t": 163.11714187700002,
+   "kind": "guide",
+   "text": " dataset, followed"
+  },
+  {
+   "t": 163.427284496,
+   "kind": "guide",
+   "text": " by constant-schedule"
+  },
+  {
+   "t": 163.626433208,
+   "kind": "guide",
+   "text": " pre-training."
+  },
+  {
+   "t": 163.779597006,
+   "kind": "tool",
+   "name": "barge",
+   "args": {
+    "readerSpeaking": true
+   },
+   "result": {}
+  },
+  {
+   "t": 163.85141142700002,
+   "kind": "tool",
+   "name": "interrupted",
+   "args": {},
+   "result": {
+    "error": "server interrupted the guide"
+   }
+  },
+  {
+   "t": 163.87483192300002,
+   "kind": "turn"
+  },
+  {
+   "t": 167.614592409,
+   "kind": "you",
+   "text": "If I wanted to use this in my own projects, what would I have to change?"
+  },
+  {
+   "t": 168.68279973900002,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "What changes are needed to use DINOv3 in my projects?",
+    "base": "g5",
+    "nav": "Using DINOv3",
+    "head": "Distill the model or use a frozen backbone for your specific task bud…"
+   },
+   "result": {
+    "custom_id": "c1",
+    "targets": [
+     "params",
+     "supervision",
+     "ade20k",
+     "depth",
+     "davis",
+     "in1k",
+     "coco"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 168.701063866,
+   "kind": "turn"
+  },
+  {
+   "t": 174.372464255,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "coco"
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 174.38714267,
+   "kind": "turn"
+  },
+  {
+   "t": 179.698120735,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "params"
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 2
+   }
+  },
+  {
+   "t": 179.714255672,
+   "kind": "turn"
+  },
+  {
+   "t": 185.07176068200002,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c1",
+    "summary": "You can use the frozen backbone with lightweight task-specific decoders or distill the teacher into smaller models to fit your compute budget."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 185.08971904300003,
+   "kind": "turn"
+  },
+  {
+   "t": 190.523104677,
+   "kind": "guide",
+   "text": "You can keep the "
+  },
+  {
+   "t": 190.77174485400002,
+   "kind": "guide",
+   "text": "backbone frozen and attach"
+  },
+  {
+   "t": 191.006901422,
+   "kind": "guide",
+   "text": " lightweight task-specific"
+  },
+  {
+   "t": 191.234619828,
+   "kind": "guide",
+   "text": " decoders to suit"
+  },
+  {
+   "t": 191.520895804,
+   "kind": "guide",
+   "text": " your needs. For"
+  },
+  {
+   "t": 191.807635534,
+   "kind": "guide",
+   "text": " example, you can use"
+  },
+  {
+   "t": 192.033514188,
+   "kind": "guide",
+   "text": " a lightweight Plain-DETR"
+  },
+  {
+   "t": 192.233996416,
+   "kind": "guide",
+   "text": " decoder for object"
+  },
+  {
+   "t": 192.489540639,
+   "kind": "guide",
+   "text": " detection. To save"
+  },
+  {
+   "t": 192.707577679,
+   "kind": "guide",
+   "text": " on resources,"
+  },
+  {
+   "t": 192.95161428100002,
+   "kind": "guide",
+   "text": " you can distill the large"
+  },
+  {
+   "t": 193.23034970700002,
+   "kind": "guide",
+   "text": " teacher model into smaller"
+  },
+  {
+   "t": 193.405315386,
+   "kind": "guide",
+   "text": " ones to fit your hardware."
+  },
+  {
+   "t": 204.94688696100002,
+   "kind": "turn"
+  },
+  {
+   "t": 210.239311728,
+   "kind": "you",
+   "text": "Does this also work for robotics?"
+  },
+  {
+   "t": 211.299079356,
+   "kind": "guide",
+   "text": "The paper does "
+  },
+  {
+   "t": 211.54812573300003,
+   "kind": "guide",
+   "text": "not explicitly test"
+  },
+  {
+   "t": 211.714910803,
+   "kind": "guide",
+   "text": " robotics, but its strong"
+  },
+  {
+   "t": 211.91414384600003,
+   "kind": "guide",
+   "text": " dense features"
+  },
+  {
+   "t": 212.227098008,
+   "kind": "guide",
+   "text": " and monocular depth estimation"
+  },
+  {
+   "t": 212.39743817000002,
+   "kind": "guide",
+   "text": " results are the"
+  },
+  {
+   "t": 212.68328908499998,
+   "kind": "guide",
+   "text": " closest match for such"
+  },
+  {
+   "t": 212.910086591,
+   "kind": "guide",
+   "text": " applications."
+  },
+  {
+   "t": 219.90835318900002,
+   "kind": "turn"
+  }
+ ],
+ "customs": [
+  {
+   "id": "c1",
+   "question": "What changes are needed to use DINOv3 in my projects?",
+   "base": "g5",
+   "nav": "Using DINOv3",
+   "head": "Distill the model or use a frozen backbone for your specific task bud…",
+   "summary": "You can use the frozen backbone with lightweight task-specific decoders or distill the teacher into smaller models to fit your compute budget.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "highlight",
+      "target": "coco"
+     }
+    ],
+    [
+     {
+      "op": "highlight",
+      "target": "params"
+     }
+    ]
+   ],
+   "pending": false
+  }
+ ],
+ "title": "Eval: nonblocking voice echo=0.6 gate=true vad=low"
+}

@@ -1,0 +1,1731 @@
+{
+ "id": "eval-voice-a9468a",
+ "paperId": "f4439ac64226",
+ "startedAt": "2026-10-03T16:10:51.253Z",
+ "duration": 307.81215791899996,
+ "events": [
+  {
+   "t": 1.2522400459999998,
+   "kind": "tool",
+   "name": "show_diagram",
+   "args": {
+    "id": "g1"
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 1.267723383,
+   "kind": "turn"
+  },
+  {
+   "t": 7.2875132549999995,
+   "kind": "guide",
+   "text": "Welcome. This "
+  },
+  {
+   "t": 7.44940423,
+   "kind": "guide",
+   "text": "paper explains"
+  },
+  {
+   "t": 7.7087840619999985,
+   "kind": "guide",
+   "text": " how to develop reasoning"
+  },
+  {
+   "t": 7.963700585000001,
+   "kind": "guide",
+   "text": " capabilities"
+  },
+  {
+   "t": 8.187477842,
+   "kind": "guide",
+   "text": " in large language models"
+  },
+  {
+   "t": 8.386409206,
+   "kind": "guide",
+   "text": " using reinforcement"
+  },
+  {
+   "t": 8.642993798,
+   "kind": "guide",
+   "text": " learning without"
+  },
+  {
+   "t": 8.870628435,
+   "kind": "guide",
+   "text": " human demonstrations."
+  },
+  {
+   "t": 9.100269202,
+   "kind": "guide",
+   "text": " What would you"
+  },
+  {
+   "t": 9.430183451,
+   "kind": "guide",
+   "text": " like to understand about"
+  },
+  {
+   "t": 9.583939989000001,
+   "kind": "guide",
+   "text": " this training pipeline?"
+  },
+  {
+   "t": 18.949393355,
+   "kind": "turn"
+  },
+  {
+   "t": 24.627272249,
+   "kind": "you",
+   "text": "What problem is this paper trying to solve?"
+  },
+  {
+   "t": 25.516113614,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "What problem is this paper trying to solve?",
+    "base": "g1",
+    "nav": "The Problem",
+    "head": "Supervised training caps reasoning performance by imitating human bia…"
+   },
+   "result": {
+    "custom_id": "c1",
+    "targets": [
+     "cold-start",
+     "reasoning-rl",
+     "rejection-sft",
+     "preference-rl",
+     "distill",
+     "v3-base",
+     "few-k-sft",
+     "r1-dev1"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 25.53145666,
+   "kind": "turn"
+  },
+  {
+   "t": 31.592904172,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c1",
+    "ops": [
+     {
+      "op": "callout",
+      "text": "Supervised training caps reasoning performance by imitating human biases and omitting self-correction steps."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 31.60777596,
+   "kind": "turn"
+  },
+  {
+   "t": 36.933177625999996,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c1",
+    "summary": "Supervised training caps reasoning performance by imitating human biases and omitting self-correction steps."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 36.953056937,
+   "kind": "turn"
+  },
+  {
+   "t": 42.911546279999996,
+   "kind": "guide",
+   "text": "Supervised training "
+  },
+  {
+   "t": 43.109408646999995,
+   "kind": "guide",
+   "text": "caps reasoning"
+  },
+  {
+   "t": 43.366910020999995,
+   "kind": "guide",
+   "text": " performance because"
+  },
+  {
+   "t": 43.58458941,
+   "kind": "guide",
+   "text": " it encourages models"
+  },
+  {
+   "t": 43.876880576,
+   "kind": "guide",
+   "text": " to imitate human"
+  },
+  {
+   "t": 44.079895805,
+   "kind": "guide",
+   "text": " solutions and"
+  },
+  {
+   "t": 44.306250100999996,
+   "kind": "guide",
+   "text": " omits essential"
+  },
+  {
+   "t": 44.539936077,
+   "kind": "guide",
+   "text": " self-correction steps."
+  },
+  {
+   "t": 44.798286522,
+   "kind": "guide",
+   "text": " Human demonstrations"
+  },
+  {
+   "t": 45.06548904499999,
+   "kind": "guide",
+   "text": " are also"
+  },
+  {
+   "t": 45.271715228,
+   "kind": "guide",
+   "text": " expensive to curate"
+  },
+  {
+   "t": 45.471324003999996,
+   "kind": "guide",
+   "text": " and introduce"
+  },
+  {
+   "t": 45.74327676,
+   "kind": "guide",
+   "text": " human cognitive"
+  },
+  {
+   "t": 46.009010637,
+   "kind": "guide",
+   "text": " biases."
+  },
+  {
+   "t": 57.644300113,
+   "kind": "turn"
+  },
+  {
+   "t": 63.25064321199999,
+   "kind": "you",
+   "text": "What is the one new idea here?"
+  },
+  {
+   "t": 63.95931409599999,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "What is the one new idea here?",
+    "base": "g1",
+    "nav": "The Core Idea",
+    "head": "Raw base models can develop complex reasoning entirely through pure r…"
+   },
+   "result": {
+    "custom_id": "c2",
+    "targets": [
+     "cold-start",
+     "reasoning-rl",
+     "rejection-sft",
+     "preference-rl",
+     "distill",
+     "v3-base",
+     "few-k-sft",
+     "r1-dev1"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 63.977532352999994,
+   "kind": "turn"
+  },
+  {
+   "t": 69.319351092,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c2",
+    "ops": [
+     {
+      "op": "callout",
+      "text": "Raw base models can develop complex reasoning entirely through pure reinforcement learning."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 69.33612236,
+   "kind": "turn"
+  },
+  {
+   "t": 74.63150830000001,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c2",
+    "summary": "Raw base models can develop complex reasoning entirely through pure reinforcement learning."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 74.64958446300001,
+   "kind": "turn"
+  },
+  {
+   "t": 80.167517498,
+   "kind": "guide",
+   "text": "The core idea is "
+  },
+  {
+   "t": 80.411647138,
+   "kind": "guide",
+   "text": "that a raw"
+  },
+  {
+   "t": 80.645750066,
+   "kind": "guide",
+   "text": " base language model"
+  },
+  {
+   "t": 80.93524881,
+   "kind": "guide",
+   "text": " can develop multi-step"
+  },
+  {
+   "t": 81.140663749,
+   "kind": "guide",
+   "text": " reasoning, self-reflection,"
+  },
+  {
+   "t": 81.37024432700001,
+   "kind": "guide",
+   "text": " and verification"
+  },
+  {
+   "t": 81.672677902,
+   "kind": "guide",
+   "text": " entirely"
+  },
+  {
+   "t": 81.862698545,
+   "kind": "guide",
+   "text": " through outcome-based"
+  },
+  {
+   "t": 82.08118897500002,
+   "kind": "guide",
+   "text": " reinforcement learning"
+  },
+  {
+   "t": 82.33766131200001,
+   "kind": "guide",
+   "text": " without any"
+  },
+  {
+   "t": 82.56477956200001,
+   "kind": "guide",
+   "text": " supervised fine-tuning."
+  },
+  {
+   "t": 92.366743748,
+   "kind": "turn"
+  },
+  {
+   "t": 98.214040064,
+   "kind": "you",
+   "text": "How is it different from DeepSeek V3?"
+  },
+  {
+   "t": 98.66797989100002,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "How is it different from DeepSeek V3?",
+    "base": "g1",
+    "nav": "R1 Versus V3",
+    "head": "DeepSeek-V3 is the base model, whereas DeepSeek-R1 applies reinforcem…"
+   },
+   "result": {
+    "custom_id": "c3",
+    "targets": [
+     "cold-start",
+     "reasoning-rl",
+     "rejection-sft",
+     "preference-rl",
+     "distill",
+     "v3-base",
+     "few-k-sft",
+     "r1-dev1"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 98.686885066,
+   "kind": "turn"
+  },
+  {
+   "t": 104.278527957,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c3",
+    "ops": [
+     {
+      "op": "badge",
+      "target": "v3-base",
+      "text": "Base Model"
+     },
+     {
+      "op": "badge",
+      "target": "reasoning-rl",
+      "text": "RL Applied Here"
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 104.296048114,
+   "kind": "turn"
+  },
+  {
+   "t": 109.693582933,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c3",
+    "summary": "DeepSeek-V3 serves as the 671B base model, while DeepSeek-R1 applies reinforcement learning to it to incentivize reasoning."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 109.71432595,
+   "kind": "turn"
+  },
+  {
+   "t": 115.20886871900001,
+   "kind": "guide",
+   "text": "DeepSeek-V3 serves as "
+  },
+  {
+   "t": 115.46597886400001,
+   "kind": "guide",
+   "text": "the mixture-of-experts"
+  },
+  {
+   "t": 115.692955373,
+   "kind": "guide",
+   "text": " base model"
+  },
+  {
+   "t": 116.007247422,
+   "kind": "guide",
+   "text": " that provides the foundation."
+  },
+  {
+   "t": 116.272804354,
+   "kind": "guide",
+   "text": " DeepSeek-R1"
+  },
+  {
+   "t": 116.46267679900001,
+   "kind": "guide",
+   "text": " then"
+  },
+  {
+   "t": 116.661174832,
+   "kind": "guide",
+   "text": " applies reinforcement"
+  },
+  {
+   "t": 116.888313389,
+   "kind": "guide",
+   "text": " learning to that"
+  },
+  {
+   "t": 117.174135793,
+   "kind": "guide",
+   "text": " base model to incentivize"
+  },
+  {
+   "t": 117.436106254,
+   "kind": "guide",
+   "text": " advanced reasoning"
+  },
+  {
+   "t": 117.602004882,
+   "kind": "guide",
+   "text": " capabilities."
+  },
+  {
+   "t": 126.803047088,
+   "kind": "turn"
+  },
+  {
+   "t": 131.091359348,
+   "kind": "you",
+   "text": "Why did they need that?"
+  },
+  {
+   "t": 131.86656245900002,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "Why did they need reinforcement learning instead of supervised fine-tuning?",
+    "base": "g3",
+    "nav": "Why Reinforcement Learning?",
+    "head": "RL induces long chain-of-thought reasoning, backtracking, and self-ve…"
+   },
+   "result": {
+    "custom_id": "c4",
+    "targets": [
+     "aime-acc",
+     "token-length",
+     "aha-moment",
+     "convergence",
+     "plot"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 131.885121287,
+   "kind": "turn"
+  },
+  {
+   "t": 137.37406466800002,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c4",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "token-length",
+      "text": "Thinking length increases with RL steps."
+     },
+     {
+      "op": "highlight",
+      "target": "aime-acc",
+      "text": "Accuracy improves along with token length."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 137.391139057,
+   "kind": "turn"
+  },
+  {
+   "t": 142.813902571,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c4",
+    "summary": "Reinforcement learning is necessary because it induces long chain-of-thought reasoning, backtracking, and self-verification behaviors without human demonstrations."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 142.834175609,
+   "kind": "turn"
+  },
+  {
+   "t": 148.268652483,
+   "kind": "guide",
+   "text": "Reinforcement learning "
+  },
+  {
+   "t": 148.52702531600002,
+   "kind": "guide",
+   "text": "is necessary"
+  },
+  {
+   "t": 148.724385189,
+   "kind": "guide",
+   "text": " because it induces long"
+  },
+  {
+   "t": 149.05471460900003,
+   "kind": "guide",
+   "text": " chain-of-thought"
+  },
+  {
+   "t": 149.317954092,
+   "kind": "guide",
+   "text": " reasoning, backtracking,"
+  },
+  {
+   "t": 149.50140744400002,
+   "kind": "guide",
+   "text": " and self-verification"
+  },
+  {
+   "t": 149.778933886,
+   "kind": "guide",
+   "text": " behaviors."
+  },
+  {
+   "t": 149.977187912,
+   "kind": "guide",
+   "text": " The diagram"
+  },
+  {
+   "t": 150.234519657,
+   "kind": "guide",
+   "text": " shows how both"
+  },
+  {
+   "t": 150.52069587900002,
+   "kind": "guide",
+   "text": " the token length and accuracy"
+  },
+  {
+   "t": 150.68945532900003,
+   "kind": "guide",
+   "text": " improve"
+  },
+  {
+   "t": 150.945675207,
+   "kind": "guide",
+   "text": " together during training."
+  },
+  {
+   "t": 160.834456256,
+   "kind": "turn"
+  },
+  {
+   "t": 166.50058082200002,
+   "kind": "you",
+   "text": "What numbers from the results should I remember?"
+  },
+  {
+   "t": 167.127455779,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "What numbers from the results should I remember?",
+    "base": "g4",
+    "nav": "Key Results",
+    "head": "DeepSeek-R1 achieves 79.8% on AIME 2024 and 72.6% via Qwen distillati…"
+   },
+   "result": {
+    "custom_id": "c5",
+    "targets": [
+     "starting-point",
+     "training-pipeline",
+     "reward-signals",
+     "language-mixing",
+     "trace-readability",
+     "aime-accuracy"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 167.14742800099998,
+   "kind": "turn"
+  },
+  {
+   "t": 172.591174297,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c5",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "aime-accuracy",
+      "text": "DeepSeek-R1 reaches 79.8% on AIME 2024."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 172.613277654,
+   "kind": "turn"
+  },
+  {
+   "t": 178.059716963,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c5",
+    "summary": "DeepSeek-R1 achieves a 79.8% pass rate on the AIME 2024 benchmark, with distilled models also performing strongly."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 178.07926709900002,
+   "kind": "turn"
+  },
+  {
+   "t": 183.50315102000002,
+   "kind": "guide",
+   "text": "DeepSeek-R1 achieves a "
+  },
+  {
+   "t": 183.75970831200001,
+   "kind": "guide",
+   "text": "score of seventy-nine"
+  },
+  {
+   "t": 183.98724807,
+   "kind": "guide",
+   "text": " point eight percent"
+  },
+  {
+   "t": 184.271587272,
+   "kind": "guide",
+   "text": " on the AIME"
+  },
+  {
+   "t": 184.529817315,
+   "kind": "guide",
+   "text": " twenty twenty-four"
+  },
+  {
+   "t": 184.757016011,
+   "kind": "guide",
+   "text": " benchmark. When"
+  },
+  {
+   "t": 185.01295755200002,
+   "kind": "guide",
+   "text": " distilling into"
+  },
+  {
+   "t": 185.24040434500003,
+   "kind": "guide",
+   "text": " a thirty-two billion"
+  },
+  {
+   "t": 185.410609833,
+   "kind": "guide",
+   "text": " parameter Qwen"
+  },
+  {
+   "t": 185.74278616400002,
+   "kind": "guide",
+   "text": " model, it achieves"
+  },
+  {
+   "t": 185.92330576,
+   "kind": "guide",
+   "text": " seventy-two point six"
+  },
+  {
+   "t": 186.15210696100002,
+   "kind": "guide",
+   "text": " percent."
+  },
+  {
+   "t": 195.705579651,
+   "kind": "turn"
+  },
+  {
+   "t": 202.06800861399998,
+   "kind": "you",
+   "text": "Can you walk me through the training pipeline in detail?"
+  },
+  {
+   "t": 202.591405419,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "Can you walk me through the training pipeline in detail?",
+    "base": "g1",
+    "nav": "Detailed Training Pipeline",
+    "head": "The four-stage pipeline combines reinforcement learning with supervis…"
+   },
+   "result": {
+    "custom_id": "c6",
+    "targets": [
+     "cold-start",
+     "reasoning-rl",
+     "rejection-sft",
+     "preference-rl",
+     "distill",
+     "v3-base",
+     "few-k-sft",
+     "r1-dev1"
+    ],
+    "next": "add_step"
+   }
+  },
+  {
+   "t": 202.60941554800002,
+   "kind": "turn"
+  },
+  {
+   "t": 208.075878249,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c6",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "cold-start",
+      "text": "Cold-start fine-tuning sets up human-readable style."
+     },
+     {
+      "op": "highlight",
+      "target": "reasoning-rl",
+      "text": "Reasoning RL uses language rules."
+     },
+     {
+      "op": "highlight",
+      "target": "rejection-sft",
+      "text": "Rejection sampling generates verified data."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 208.095547758,
+   "kind": "turn"
+  },
+  {
+   "t": 213.629678622,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c6",
+    "ops": [
+     {
+      "op": "highlight",
+      "target": "preference-rl",
+      "text": "Secondary RL aligns for safety."
+     },
+     {
+      "op": "highlight",
+      "target": "distill",
+      "text": "Distillation transfers reasoning to smaller models."
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 2
+   }
+  },
+  {
+   "t": 213.650334496,
+   "kind": "turn"
+  },
+  {
+   "t": 218.983471078,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c6",
+    "summary": "The pipeline begins with cold-start fine-tuning, followed by reinforcement learning, rejection sampling, secondary RL alignment, and finally model distillation."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 219.00268317,
+   "kind": "turn"
+  },
+  {
+   "t": 224.403329588,
+   "kind": "guide",
+   "text": "The pipeline begins "
+  },
+  {
+   "t": 224.621924794,
+   "kind": "guide",
+   "text": "with cold-start"
+  },
+  {
+   "t": 224.879854356,
+   "kind": "guide",
+   "text": " fine-tuning to set"
+  },
+  {
+   "t": 225.134300139,
+   "kind": "guide",
+   "text": " the human-readable style."
+  },
+  {
+   "t": 225.388641747,
+   "kind": "tool",
+   "name": "barge",
+   "args": {
+    "readerSpeaking": true
+   },
+   "result": {}
+  },
+  {
+   "t": 225.46400382000002,
+   "kind": "tool",
+   "name": "interrupted",
+   "args": {},
+   "result": {
+    "error": "server interrupted the guide"
+   }
+  },
+  {
+   "t": 225.535814587,
+   "kind": "turn"
+  },
+  {
+   "t": 229.42824124900002,
+   "kind": "you",
+   "text": "If I wanted to use this in my own projects, what would I have to change?"
+  },
+  {
+   "t": 229.91445893399998,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "If I wanted to use this in my own projects, what would I have to change?",
+    "nav": "Using It In Your Projects",
+    "head": "Applying DeepSeek-R1 requires robust reward signals, significant comp…"
+   },
+   "result": {
+    "custom_id": "c7",
+    "targets": [],
+    "next": "draw_from_scratch"
+   }
+  },
+  {
+   "t": 229.935115985,
+   "kind": "turn"
+  },
+  {
+   "t": 235.52939953700002,
+   "kind": "tool",
+   "name": "draw_from_scratch",
+   "args": {
+    "custom_id": "c7",
+    "type": "compare",
+    "brief": "A comparison chart listing the compute, model scale, and reward signal requirements for applying the DeepSeek-R1 pipeline to new projects."
+   },
+   "result": {
+    "started": true
+   }
+  },
+  {
+   "t": 235.557720217,
+   "kind": "turn"
+  },
+  {
+   "t": 238.861505889,
+   "kind": "tool",
+   "name": "scratch_ready",
+   "args": {
+    "custom_id": "c7"
+   },
+   "result": {
+    "spec": {
+     "id": "c7",
+     "nav": "Using It In Your Projects",
+     "head": "Applying DeepSeek-R1 requires robust reward signals, significant comp…",
+     "body": [
+      "Applying the DeepSeek-R1 recipe depends on whether your project performs pure reinforcement learning on a base model or distills existing reasoning data into a smaller checkpoint.",
+      "Direct RL demands deterministic verification and sufficient model capacity. Small models enter repetitive loops unless trained via supervised distillation."
+     ],
+     "hint": "Select a row to see the requirements and practical trade-offs.",
+     "sources": [
+      "s3",
+      "s6",
+      "sG.1"
+     ],
+     "type": "compare",
+     "columns": [
+      "Direct RL Pipeline",
+      "Distillation Pipeline"
+     ],
+     "rows": [
+      {
+       "id": "base_scale",
+       "label": "Base model scale",
+       "cells": [
+        "32B dense or larger",
+        "1.5B to 14B models"
+       ],
+       "mark": true,
+       "note": "Pure RL failed on 7B dense and 16B MoE models, yielding repetitive token loops. Successful RL required 32B dense or massive MoE checkpoints like 671B DeepSeek-V3. Smaller models only succeeded through SFT distillation."
+      },
+      {
+       "id": "reward_signal",
+       "label": "Reward feedback",
+       "cells": [
+        "Deterministic / rules",
+        "Ground-truth targets"
+       ],
+       "mark": true,
+       "note": "Direct RL requires unambiguous verifiers such as math solvers or compilers. Neural reward models suffer from reward hacking when scaled beyond a few hundred steps."
+      },
+      {
+       "id": "data_requirements",
+       "label": "Training data needs",
+       "cells": [
+        "Cold start + RL prompts",
+        "Reasoning trajectories"
+       ],
+       "note": "The full pipeline combines cold-start reasoning traces, RL prompt sets, and 800,000 curated SFT trajectories. Distillation simply fine-tunes base models directly on those exported teacher trajectories."
+      },
+      {
+       "id": "compute_cost",
+       "label": "Compute requirements",
+       "cells": [
+        "Tens of thousands H800 h",
+        "Modest fine-tuning cost"
+       ],
+       "note": "RL on large models generated thousands of long rollouts up to 32,768 tokens across hundreds of steps. Distillation runs standard supervised fine-tuning over 800k examples for 2-3 epochs."
+      },
+      {
+       "id": "prompt_format",
+       "label": "Prompting style",
+       "cells": [
+        "Zero-shot with format",
+        "Zero-shot with format"
+       ],
+       "note": "The paper notes that few-shot prompting consistently hurts reasoning performance across both settings. Users should supply zero-shot instructions and specify desired output formats directly."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "t": 241.496671964,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c7",
+    "ops": [
+     {
+      "op": "addRow",
+      "label": "Model Scale",
+      "cells": [
+       "Large base models required"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Reward Signal",
+      "cells": [
+       "Robust programmatic signals needed"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Compute Scale",
+      "cells": [
+       "Requires significant GPU hours"
+      ]
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 241.517035418,
+   "kind": "turn"
+  },
+  {
+   "t": 246.957181427,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c7",
+    "summary": "Applying DeepSeek-R1 requires large base models, robust programmatic reward signals, and significant compute resources."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 246.97716768499998,
+   "kind": "turn"
+  },
+  {
+   "t": 252.57186680799998,
+   "kind": "guide",
+   "text": "Applying this "
+  },
+  {
+   "t": 252.848405869,
+   "kind": "guide",
+   "text": "approach requires"
+  },
+  {
+   "t": 253.060673279,
+   "kind": "guide",
+   "text": " large base models"
+  },
+  {
+   "t": 253.369527865,
+   "kind": "guide",
+   "text": " and robust programmatic"
+  },
+  {
+   "t": 253.597723696,
+   "kind": "guide",
+   "text": " reward signals"
+  },
+  {
+   "t": 253.795601678,
+   "kind": "guide",
+   "text": " for reinforcement learning."
+  },
+  {
+   "t": 254.02434461200002,
+   "kind": "guide",
+   "text": " You also"
+  },
+  {
+   "t": 254.25104157500002,
+   "kind": "guide",
+   "text": " need significant"
+  },
+  {
+   "t": 254.50695653600002,
+   "kind": "guide",
+   "text": " compute resources"
+  },
+  {
+   "t": 254.764664292,
+   "kind": "guide",
+   "text": " for the training phases."
+  },
+  {
+   "t": 262.696299249,
+   "kind": "turn"
+  },
+  {
+   "t": 268.02061755799997,
+   "kind": "you",
+   "text": "Does this also work for robotics?"
+  },
+  {
+   "t": 268.52337128799996,
+   "kind": "tool",
+   "name": "start_custom",
+   "args": {
+    "question": "Does this also work for robotics?",
+    "nav": "Robotics Application",
+    "head": "The paper does not test robotics, but the RL principles may apply."
+   },
+   "result": {
+    "custom_id": "c8",
+    "targets": [],
+    "next": "draw_from_scratch"
+   }
+  },
+  {
+   "t": 268.54480131099996,
+   "kind": "turn"
+  },
+  {
+   "t": 273.98375771499997,
+   "kind": "tool",
+   "name": "draw_from_scratch",
+   "args": {
+    "custom_id": "c8",
+    "type": "compare",
+    "brief": "Comparison of reinforcement learning application between language model reasoning and robotic control, highlighting differences in action spaces and environment feedback."
+   },
+   "result": {
+    "started": true
+   }
+  },
+  {
+   "t": 274.00475572899995,
+   "kind": "turn"
+  },
+  {
+   "t": 277.122718816,
+   "kind": "tool",
+   "name": "scratch_ready",
+   "args": {
+    "custom_id": "c8"
+   },
+   "result": {
+    "spec": {
+     "id": "c8",
+     "nav": "Robotics Application",
+     "head": "The paper does not test robotics, but the RL principles may apply.",
+     "body": [
+      "DeepSeek-R1 relies on rule-based outcome verifiers over discrete text tokens, where sampling is cheap and fast.",
+      "Applying pure reinforcement learning to physical robotics faces distinct constraints in simulation fidelity, safety, and action space."
+     ],
+     "hint": "Select a row to see key operational differences.",
+     "sources": [
+      "s6",
+      "sA.2",
+      "sH.3"
+     ],
+     "type": "compare",
+     "columns": [
+      "DeepSeek-R1 (LLM)",
+      "Robotic Control (RL)"
+     ],
+     "rows": [
+      {
+       "id": "action",
+       "label": "Action space",
+       "cells": [
+        "Discrete tokens",
+        "Continuous motor torques"
+       ],
+       "mark": false,
+       "note": "Language models sample discrete tokens from a finite vocabulary, whereas physical robot policies typically operate in continuous multi-joint action spaces."
+      },
+      {
+       "id": "env",
+       "label": "Environment",
+       "cells": [
+        "Deterministic context",
+        "Physical or simulated world"
+       ],
+       "mark": false,
+       "note": "LLM generation updates a symbolic prompt buffer deterministically. Robotics interacts with continuous, noisy physics or imperfect simulators subject to sim-to-real gaps."
+      },
+      {
+       "id": "feedback",
+       "label": "Reward verifier",
+       "cells": [
+        "Rule-based outcome check",
+        "Sensor states or goal reach"
+       ],
+       "mark": true,
+       "note": "DeepSeek-R1 succeeds by evaluating rule-based ground-truth correctness at the end of a trajectory. In robotics, reward verification requires state tracking or sensor instrumentation, making reward specification harder."
+      },
+      {
+       "id": "sampling",
+       "label": "Sample collection",
+       "cells": [
+        "Parallel GPU generation",
+        "Real-time physics execution"
+       ],
+       "mark": true,
+       "note": "Generating thousands of LLM candidate reasoning traces runs rapidly in parallel on GPU clusters. In physical robotics, sampling is limited by real-time hardware speed and wear."
+      },
+      {
+       "id": "safety",
+       "label": "Exploration safety",
+       "cells": [
+        "Zero physical risk",
+        "Hardware damage and safety"
+       ],
+       "mark": false,
+       "note": "Pure trial-and-error exploration carries zero physical safety risk in text generation. In contrast, unconstrained exploration on physical robots can cause hardware collisions or damage."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "t": 279.56977383599997,
+   "kind": "tool",
+   "name": "add_step",
+   "args": {
+    "custom_id": "c8",
+    "ops": [
+     {
+      "op": "addRow",
+      "label": "Action Space",
+      "cells": [
+       "Language token generation"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Reward Signal",
+      "cells": [
+       "Rule-based accuracy and format"
+      ]
+     }
+    ]
+   },
+   "result": {
+    "ok": true,
+    "step": 1
+   }
+  },
+  {
+   "t": 279.589877626,
+   "kind": "turn"
+  },
+  {
+   "t": 284.96882592699995,
+   "kind": "tool",
+   "name": "finish_custom",
+   "args": {
+    "custom_id": "c8",
+    "summary": "The paper does not test robotics, but the RL principles may apply."
+   },
+   "result": {
+    "ok": true
+   }
+  },
+  {
+   "t": 284.98686947799996,
+   "kind": "turn"
+  },
+  {
+   "t": 290.4571740399999,
+   "kind": "guide",
+   "text": "The paper does "
+  },
+  {
+   "t": 290.683593976,
+   "kind": "guide",
+   "text": "not test robotics,"
+  },
+  {
+   "t": 290.969363654,
+   "kind": "guide",
+   "text": " so we cannot"
+  },
+  {
+   "t": 291.25452877099997,
+   "kind": "guide",
+   "text": " confirm if it works there."
+  },
+  {
+   "t": 291.49924232699993,
+   "kind": "guide",
+   "text": " However,"
+  },
+  {
+   "t": 291.6807705,
+   "kind": "guide",
+   "text": " the reinforcement learning"
+  },
+  {
+   "t": 292.04922764299994,
+   "kind": "guide",
+   "text": " principles of using"
+  },
+  {
+   "t": 292.23002268,
+   "kind": "guide",
+   "text": " group rewards for policy"
+  },
+  {
+   "t": 292.39291879699994,
+   "kind": "guide",
+   "text": " optimization"
+  },
+  {
+   "t": 292.648337235,
+   "kind": "guide",
+   "text": " might be relevant"
+  },
+  {
+   "t": 292.878064105,
+   "kind": "guide",
+   "text": " to robotic control."
+  },
+  {
+   "t": 302.21292571099997,
+   "kind": "turn"
+  }
+ ],
+ "customs": [
+  {
+   "id": "c1",
+   "question": "What problem is this paper trying to solve?",
+   "base": "g1",
+   "nav": "The Problem",
+   "head": "Supervised training caps reasoning performance by imitating human bia…",
+   "summary": "Supervised training caps reasoning performance by imitating human biases and omitting self-correction steps.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "callout",
+      "text": "Supervised training caps reasoning performance by imitating human biases and omitting self-correction steps."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c2",
+   "question": "What is the one new idea here?",
+   "base": "g1",
+   "nav": "The Core Idea",
+   "head": "Raw base models can develop complex reasoning entirely through pure r…",
+   "summary": "Raw base models can develop complex reasoning entirely through pure reinforcement learning.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "callout",
+      "text": "Raw base models can develop complex reasoning entirely through pure reinforcement learning."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c3",
+   "question": "How is it different from DeepSeek V3?",
+   "base": "g1",
+   "nav": "R1 Versus V3",
+   "head": "DeepSeek-V3 is the base model, whereas DeepSeek-R1 applies reinforcem…",
+   "summary": "DeepSeek-V3 serves as the 671B base model, while DeepSeek-R1 applies reinforcement learning to it to incentivize reasoning.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "badge",
+      "target": "v3-base",
+      "text": "Base Model"
+     },
+     {
+      "op": "badge",
+      "target": "reasoning-rl",
+      "text": "RL Applied Here"
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c4",
+   "question": "Why did they need reinforcement learning instead of supervised fine-tuning?",
+   "base": "g3",
+   "nav": "Why Reinforcement Learning?",
+   "head": "RL induces long chain-of-thought reasoning, backtracking, and self-ve…",
+   "summary": "Reinforcement learning is necessary because it induces long chain-of-thought reasoning, backtracking, and self-verification behaviors without human demonstrations.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "highlight",
+      "target": "token-length",
+      "text": "Thinking length increases with RL steps."
+     },
+     {
+      "op": "highlight",
+      "target": "aime-acc",
+      "text": "Accuracy improves along with token length."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c5",
+   "question": "What numbers from the results should I remember?",
+   "base": "g4",
+   "nav": "Key Results",
+   "head": "DeepSeek-R1 achieves 79.8% on AIME 2024 and 72.6% via Qwen distillati…",
+   "summary": "DeepSeek-R1 achieves a 79.8% pass rate on the AIME 2024 benchmark, with distilled models also performing strongly.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "highlight",
+      "target": "aime-accuracy",
+      "text": "DeepSeek-R1 reaches 79.8% on AIME 2024."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c6",
+   "question": "Can you walk me through the training pipeline in detail?",
+   "base": "g1",
+   "nav": "Detailed Training Pipeline",
+   "head": "The four-stage pipeline combines reinforcement learning with supervis…",
+   "summary": "The pipeline begins with cold-start fine-tuning, followed by reinforcement learning, rejection sampling, secondary RL alignment, and finally model distillation.",
+   "spec": null,
+   "steps": [
+    [
+     {
+      "op": "highlight",
+      "target": "cold-start",
+      "text": "Cold-start fine-tuning sets up human-readable style."
+     },
+     {
+      "op": "highlight",
+      "target": "reasoning-rl",
+      "text": "Reasoning RL uses language rules."
+     },
+     {
+      "op": "highlight",
+      "target": "rejection-sft",
+      "text": "Rejection sampling generates verified data."
+     }
+    ],
+    [
+     {
+      "op": "highlight",
+      "target": "preference-rl",
+      "text": "Secondary RL aligns for safety."
+     },
+     {
+      "op": "highlight",
+      "target": "distill",
+      "text": "Distillation transfers reasoning to smaller models."
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c7",
+   "question": "If I wanted to use this in my own projects, what would I have to change?",
+   "base": null,
+   "nav": "Using It In Your Projects",
+   "head": "Applying DeepSeek-R1 requires robust reward signals, significant comp…",
+   "summary": "Applying DeepSeek-R1 requires large base models, robust programmatic reward signals, and significant compute resources.",
+   "spec": {
+    "id": "c7",
+    "nav": "Using It In Your Projects",
+    "head": "Applying DeepSeek-R1 requires robust reward signals, significant comp…",
+    "body": [
+     "Applying the DeepSeek-R1 recipe depends on whether your project performs pure reinforcement learning on a base model or distills existing reasoning data into a smaller checkpoint.",
+     "Direct RL demands deterministic verification and sufficient model capacity. Small models enter repetitive loops unless trained via supervised distillation."
+    ],
+    "hint": "Select a row to see the requirements and practical trade-offs.",
+    "sources": [
+     "s3",
+     "s6",
+     "sG.1"
+    ],
+    "type": "compare",
+    "columns": [
+     "Direct RL Pipeline",
+     "Distillation Pipeline"
+    ],
+    "rows": [
+     {
+      "id": "base_scale",
+      "label": "Base model scale",
+      "cells": [
+       "32B dense or larger",
+       "1.5B to 14B models"
+      ],
+      "mark": true,
+      "note": "Pure RL failed on 7B dense and 16B MoE models, yielding repetitive token loops. Successful RL required 32B dense or massive MoE checkpoints like 671B DeepSeek-V3. Smaller models only succeeded through SFT distillation."
+     },
+     {
+      "id": "reward_signal",
+      "label": "Reward feedback",
+      "cells": [
+       "Deterministic / rules",
+       "Ground-truth targets"
+      ],
+      "mark": true,
+      "note": "Direct RL requires unambiguous verifiers such as math solvers or compilers. Neural reward models suffer from reward hacking when scaled beyond a few hundred steps."
+     },
+     {
+      "id": "data_requirements",
+      "label": "Training data needs",
+      "cells": [
+       "Cold start + RL prompts",
+       "Reasoning trajectories"
+      ],
+      "note": "The full pipeline combines cold-start reasoning traces, RL prompt sets, and 800,000 curated SFT trajectories. Distillation simply fine-tunes base models directly on those exported teacher trajectories."
+     },
+     {
+      "id": "compute_cost",
+      "label": "Compute requirements",
+      "cells": [
+       "Tens of thousands H800 h",
+       "Modest fine-tuning cost"
+      ],
+      "note": "RL on large models generated thousands of long rollouts up to 32,768 tokens across hundreds of steps. Distillation runs standard supervised fine-tuning over 800k examples for 2-3 epochs."
+     },
+     {
+      "id": "prompt_format",
+      "label": "Prompting style",
+      "cells": [
+       "Zero-shot with format",
+       "Zero-shot with format"
+      ],
+      "note": "The paper notes that few-shot prompting consistently hurts reasoning performance across both settings. Users should supply zero-shot instructions and specify desired output formats directly."
+     }
+    ]
+   },
+   "steps": [
+    [
+     {
+      "op": "addRow",
+      "label": "Model Scale",
+      "cells": [
+       "Large base models required"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Reward Signal",
+      "cells": [
+       "Robust programmatic signals needed"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Compute Scale",
+      "cells": [
+       "Requires significant GPU hours"
+      ]
+     }
+    ]
+   ],
+   "pending": false
+  },
+  {
+   "id": "c8",
+   "question": "Does this also work for robotics?",
+   "base": null,
+   "nav": "Robotics Application",
+   "head": "The paper does not test robotics, but the RL principles may apply.",
+   "summary": "The paper does not test robotics, but the RL principles may apply.",
+   "spec": {
+    "id": "c8",
+    "nav": "Robotics Application",
+    "head": "The paper does not test robotics, but the RL principles may apply.",
+    "body": [
+     "DeepSeek-R1 relies on rule-based outcome verifiers over discrete text tokens, where sampling is cheap and fast.",
+     "Applying pure reinforcement learning to physical robotics faces distinct constraints in simulation fidelity, safety, and action space."
+    ],
+    "hint": "Select a row to see key operational differences.",
+    "sources": [
+     "s6",
+     "sA.2",
+     "sH.3"
+    ],
+    "type": "compare",
+    "columns": [
+     "DeepSeek-R1 (LLM)",
+     "Robotic Control (RL)"
+    ],
+    "rows": [
+     {
+      "id": "action",
+      "label": "Action space",
+      "cells": [
+       "Discrete tokens",
+       "Continuous motor torques"
+      ],
+      "mark": false,
+      "note": "Language models sample discrete tokens from a finite vocabulary, whereas physical robot policies typically operate in continuous multi-joint action spaces."
+     },
+     {
+      "id": "env",
+      "label": "Environment",
+      "cells": [
+       "Deterministic context",
+       "Physical or simulated world"
+      ],
+      "mark": false,
+      "note": "LLM generation updates a symbolic prompt buffer deterministically. Robotics interacts with continuous, noisy physics or imperfect simulators subject to sim-to-real gaps."
+     },
+     {
+      "id": "feedback",
+      "label": "Reward verifier",
+      "cells": [
+       "Rule-based outcome check",
+       "Sensor states or goal reach"
+      ],
+      "mark": true,
+      "note": "DeepSeek-R1 succeeds by evaluating rule-based ground-truth correctness at the end of a trajectory. In robotics, reward verification requires state tracking or sensor instrumentation, making reward specification harder."
+     },
+     {
+      "id": "sampling",
+      "label": "Sample collection",
+      "cells": [
+       "Parallel GPU generation",
+       "Real-time physics execution"
+      ],
+      "mark": true,
+      "note": "Generating thousands of LLM candidate reasoning traces runs rapidly in parallel on GPU clusters. In physical robotics, sampling is limited by real-time hardware speed and wear."
+     },
+     {
+      "id": "safety",
+      "label": "Exploration safety",
+      "cells": [
+       "Zero physical risk",
+       "Hardware damage and safety"
+      ],
+      "mark": false,
+      "note": "Pure trial-and-error exploration carries zero physical safety risk in text generation. In contrast, unconstrained exploration on physical robots can cause hardware collisions or damage."
+     }
+    ]
+   },
+   "steps": [
+    [
+     {
+      "op": "addRow",
+      "label": "Action Space",
+      "cells": [
+       "Language token generation"
+      ]
+     },
+     {
+      "op": "addRow",
+      "label": "Reward Signal",
+      "cells": [
+       "Rule-based accuracy and format"
+      ]
+     }
+    ]
+   ],
+   "pending": false
+  }
+ ],
+ "title": "Eval: nonblocking voice echo=0.6 gate=true vad=low"
+}

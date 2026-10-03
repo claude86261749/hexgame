@@ -116,3 +116,25 @@ describe('executor + replay', () => {
     expect(lines.map(l => l.words.map(w => w.w).join(' '))).toEqual(['Why?', 'Because it is.']);
   });
 });
+
+describe('transcript cleanup', () => {
+  it('drops non-speech markers, fixes underscores and joins separate generations with a space', () => {
+    const lines = transcriptLines([{ t: 0, kind: 'guide', text: 'It reaches eighty_eight point four.' }, { t: 1, kind: 'guide', text: 'It also <no speech>{pause} scales.(No audio)' }], 3);
+    expect(lines.map(l => l.words.map(w => w.w).join(' ')).join(' ')).toBe('It reaches eighty eight point four. It also scales.');
+  });
+});
+
+describe('executor leniency', () => {
+  it('accepts the cosmetic slips the live model actually makes', async () => {
+    const st = stateHolder(emptyGuide());
+    const deps = { diagrams: [flow, chart] as Diagram[], state: st.get, nextCustomId: () => 'c1', record: (n: string, a: any, r: any) => st.apply(n, a, r),
+      scratch: async () => { throw new Error('unused'); }, section: async () => ({ id: 's1', title: 'Intro', text: 'x' }) };
+    expect((await execTool(deps, 'show_diagram', { id: 'g1.b' })).response.error).toBeUndefined();          // dot notation
+    expect((await execTool(deps, 'show_diagram', { id: 'g1', part: 'nope' })).response.error).toBeUndefined(); // wrong part: shown anyway
+    await execTool(deps, 'start_custom', { question: 'q', base: 'g1', nav: 'A navigation title that is far too long to fit', head: 'h' });
+    const r = await execTool(deps, 'add_step', { ops: [{ op: 'high-light', target: 'b' }, { op: 'badge', target: 'a', label: 'A label that is much too long for a badge' }] });
+    expect(r.response.error).toBeUndefined();
+    expect((await execTool(deps, 'add_step', { ops: [{ op: 'highlight', target: 'missing' }] })).response.error).toMatch(/does not exist/); // semantic errors still fail
+    expect((await execTool(deps, 'finish_custom', { summary: 's' })).silent).toBe(true);
+  });
+});

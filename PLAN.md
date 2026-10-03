@@ -289,3 +289,33 @@ Next:
 - Context caching for the paper text across the spec calls.
 - More sim kinds.
 - A reading library for the map.
+
+### Live guide tuning (follow-up)
+
+Reported problems: the guide worked badly and heard its own voice. What was found and fixed:
+- **Echo.** The mic streamed all the time, and Web Audio playback is not a reliable echo-cancellation reference, so the guide transcribed and answered its own speech. That caused about 21 self-interruptions in 7 questions in simulation.
+  - Fix: `shared/duplex.ts`, an echo gate that is half-duplex with reference-based barge-in.
+  - Stop / Esc to interrupt, and a Headphones toggle.
+  - Low start-of-speech sensitivity on the server. On its own this barely helped; the gate is the fix.
+- **Prompt.** The old prompt contradicted itself (stop after 1–3 sentences versus go through all beats), had no voice rules and leaked section ids. It was rewritten voice-first. The old version is kept in `eval/baselines/live.v1.md` for A/B tests.
+- **Tool loop.** Every tool response made the model speak again, and it repeated itself.
+  - Screen tools are now non-blocking. Results are delivered silently once the guide has spoken, or wake it only if it has not answered.
+  - The executor forgives cosmetic slips.
+  - `custom_id` is optional.
+- **Harness.** `eval/live.ts` now has a flash judge and a `--voice` mode: TTS questions streamed in real time with the guide's own audio mixed back in at a chosen echo gain.
+
+Results (judge scores 1–5, 7 questions):
+
+| Run | Answered | Faithful | Spoken | Screen | Self-interruptions |
+|---|---|---|---|---|---|
+| Old prompt, voice, echo 0.5, no gate | 1.86 | 3.14 | 1.0 | 2.57 | 21 |
+| Final, voice, DINOv3, echo 0.6 | 4.86 | 5 | 4.86 | 4.29 | 1 (the deliberate barge-in) |
+| Final, voice, DeepSeek-R1, echo 0.6 | 4.71 | 5 | 4.86 | 4.14 | 1 (the deliberate barge-in) |
+| Final, text, DINOv3 / DeepSeek-R1 | 4.86 / 4.86 | 5 / 5 | 4.29 / 5 | 4.71 / 3.71 | – |
+
+Open issues:
+- **Barge-in on loud speakers** needs the reader to be clearly louder than the echo; Stop / Esc covers the rest.
+- **Handling interruptions:** the guide sometimes answers both the interrupted and the new question.
+- **Occasional sign-off filler.**
+- **Screen use on unseen papers** sometimes picks a neighbouring diagram.
+- **Variance between runs is high**, so compare several runs before changing the prompt.

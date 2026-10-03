@@ -174,7 +174,7 @@ export const OverlayOp = z.object({
   target: z.string().optional(), text: z.string().max(140).optional(),
   id: z.string().optional(), label: z.string().max(28).optional(), sub: z.string().max(36).optional(),
   after: z.string().optional(), from: z.string().optional(), to: z.string().optional(),
-  x: z.number().min(0).max(1).optional(), cells: z.array(z.string().max(34)).max(3).optional(),
+  x: z.number().min(0).max(1).optional(), cells: z.array(z.string().max(60)).max(3).optional(),
   shape: SeriesShape.optional(), peak: z.number().optional(),
 });
 export type OverlayOp = z.infer<typeof OverlayOp>;

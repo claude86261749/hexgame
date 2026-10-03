@@ -3,10 +3,10 @@
 import { MODELS } from '../shared/config.ts';
 import type { Diagram, Digest, PaperDoc } from '../shared/schema.ts';
 import { layout, partsOf } from '../shared/layout.ts';
-import { TOOL_DECLS } from '../shared/tools.ts';
+import { toolDecls } from '../shared/tools.ts';
 import { ai } from './gemini.ts';
-import { prompt } from './prompts.ts';
-import { sectionIndex } from './ingest.ts';
+import { prompt, fill } from './prompts.ts';
+import { StartSensitivity, EndSensitivity } from '@google/genai';
 
 export function manifest(ds: Diagram[]): string {
   return ds.map(d => {
@@ -25,24 +25,32 @@ export function manifest(ds: Diagram[]): string {
 
 const digestText = (g: Digest) => [
   `${g.title}. ${g.byline}. Field: ${g.field}.`, g.gist, `Problem: ${g.problem.text}`, `New idea: ${g.newIdea.text}`,
-  `Claims:\n${g.claims.map(c => `- ${c.text} [${c.sources.join(',')}]`).join('\n')}`,
+  `Claims:\n${g.claims.map(c => `- ${c.text}`).join('\n')}`,
   `Method:\n${g.method.map(m => `- ${m.step}: ${m.detail}`).join('\n')}`,
-  `Findings:\n${g.findings.map(c => `- ${c.text} [${c.sources.join(',')}]`).join('\n')}`,
+  `Findings:\n${g.findings.map(c => `- ${c.text}`).join('\n')}`,
   `Limitations:\n${g.limitations.map(c => `- ${c.text}`).join('\n')}`,
   `Related work:\n${g.related.map(r => `- ${r.label} (${r.year}, ${r.relation}): ${r.link}`).join('\n')}`,
   `Open directions (the guide's suggestions, not the authors'):\n${g.openDirections.map(o => `- ${o.title}: ${o.open}`).join('\n')}`,
   `Glossary:\n${g.glossary.map(x => `- ${x.term}: ${x.plain}`).join('\n')}`,
 ].join('\n\n');
 
-export function liveConfig(doc: PaperDoc, digest: Digest, diagrams: Diagram[]) {
-  const systemInstruction = prompt('live', {
-    title: digest.title, byline: digest.byline, digest: digestText(digest), manifest: manifest(diagrams),
-    sections: sectionIndex(doc), firstNav: diagrams[0]?.nav || '',
-  });
+/** Compact section list for read_section: numbered sections up to depth 3, no references. */
+const liveSections = (doc: PaperDoc) => doc.sections
+  .filter(s => /^(abstract|s[0-9A-Z]+(\.\d+){0,2})$/.test(s.id) && s.text.length > 200)
+  .map(s => `${s.id}: ${s.title.replace(/^[A-Z0-9.]+\s+/, '')}`).join('\n');
+
+/** `template` overrides prompts/live.md (used by the eval harness for A/B runs). */
+export function liveConfig(doc: PaperDoc, digest: Digest, diagrams: Diagram[], opts: { template?: string; nonBlocking?: boolean } = {}) {
+  const slots = { title: digest.title, byline: digest.byline, digest: digestText(digest), manifest: manifest(diagrams), sections: liveSections(doc), firstNav: diagrams[0]?.nav || '' };
+  const systemInstruction = opts.template ? fill(opts.template, slots, 'live') : prompt('live', slots);
   return {
-    systemInstruction, tools: [{ functionDeclarations: TOOL_DECLS }],
+    systemInstruction, tools: [{ functionDeclarations: toolDecls({ nonBlocking: opts.nonBlocking ?? process.env.LIVE_NONBLOCKING !== '0' }) }],
     contextWindowCompression: { slidingWindow: {} }, sessionResumption: {},
     outputAudioTranscription: {}, inputAudioTranscription: {},
+    // Gemini Live defaults to high start sensitivity, which fires on speaker echo and room noise.
+    realtimeInputConfig: { automaticActivityDetection: {
+      startOfSpeechSensitivity: StartSensitivity.START_SENSITIVITY_LOW, endOfSpeechSensitivity: EndSensitivity.END_SENSITIVITY_LOW,
+      prefixPaddingMs: 120, silenceDurationMs: 700 } },
     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: process.env.LIVE_VOICE || 'Kore' } } },
   };
 }

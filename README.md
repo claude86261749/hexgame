@@ -39,6 +39,11 @@ paper.md ─ ingest ─▶ PaperDoc (sections with stable ids: s4.2, sA.1, refs)
   - The guide's tools: `show_diagram`, `start_custom`, `add_step` (orange overlay ops anchored to element ids), `draw_from_scratch`, `finish_custom` and `read_section`.
   - `draw_from_scratch` is a non-blocking call: flash draws the diagram while the guide keeps talking.
   - Every tool call is validated by `shared/executor.ts`. Bad calls return an error the model can act on, such as "`dense_peak` belongs to g2; start a new custom diagram with base g2".
+- **The guide does not hear itself.** Browser echo cancellation is unreliable for Web Audio playback. Without help, the speaker output leaks into the mic, Gemini's voice detection takes it for the reader, and the guide interrupts and answers itself.
+  - `shared/duplex.ts` holds the mic back while the guide is playing. It still lets the reader barge in when the mic is clearly louder than the echo it expects, using the level of what the speaker is playing and a learned room coupling.
+  - On a barge-in it forwards 0.5 s of preroll and drops the rest of the interrupted answer. Stop / Esc does the same by hand.
+  - A Headphones toggle turns the gate off.
+  - The server also sets Gemini's start-of-speech sensitivity to low.
 - **Sessions replay exactly.** A session is a timed log of transcript chunks and tool calls. The same reducer (`shared/session.ts`) drives the live screen and replay, so the player rebuilds what the reader saw at any moment.
 
 ## Layout
@@ -65,6 +70,10 @@ paper.md ─ ingest ─▶ PaperDoc (sections with stable ids: s4.2, sA.1, refs)
 
 ```bash
 npm run eval -- papers/*.md            # per paper: diagrams kept/dropped, repairs, lint issues, bad citations, fact-check rewrites, tokens
-npm run eval:live -- <paperId> ["question" …]   # drives gemini-3.8-live over text; checks tool errors and draw-before-speak
+npm run eval:live -- <paperId> [--prompt file.md] [--q "question"]…    # text: drives gemini-3.8-live, a flash judge grades each answer (answered / faithful / spoken / screen)
+npm run eval:live -- <paperId> --voice --echo 0.5 [--no-gate] [--default-vad] [--save]
+    # voice: questions spoken with Gemini TTS and streamed as a live mic in real time; the guide's own audio is mixed back
+    # in at --echo gain (a laptop speaker) through the same echo gate as the browser. Reports server interruptions,
+    # false barge-ins, how much of what the guide "heard" was its own voice, and whether the questions were heard right.
 npm run shots -- <paperId>             # screenshots of every diagram and pipeline step (needs `npm run dev`)
 ```

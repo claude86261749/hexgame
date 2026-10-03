@@ -37,6 +37,10 @@ export function foldEvents(events: SessionEvent[], upTo = Infinity): GuideState 
 }
 
 /* -------- transcript lines for the player */
+/** Live transcription sometimes carries non-speech markers such as "(No audio)". */
+export const cleanTranscript = (s: string) => s
+  .replace(/\((?:no audio|silence|inaudible)\)|<[^>]{0,20}>|\{[a-z ]{0,12}\}/gi, '')
+  .replace(/(\w)_(?=\w)/g, '$1 ');
 export interface Line { who: 'you' | 'guide'; t0: number; t1: number; words: { w: string; t: number }[]; key: string }
 export function transcriptLines(events: SessionEvent[], duration: number): Line[] {
   // Group consecutive same-speaker chunks into a run; chunks can split words, so time words by character offset.
@@ -46,13 +50,19 @@ export function transcriptLines(events: SessionEvent[], duration: number): Line[
     if (e.kind !== 'you' && e.kind !== 'guide') continue;
     let r = runs[runs.length - 1];
     if (!r || r.who !== e.kind || (r.chunks.length && e.kind === 'you' && e.t - r.chunks[r.chunks.length - 1].t > 4)) runs.push(r = { who: e.kind, chunks: [] });
-    r.chunks.push({ t: e.t, text: e.text });
+    r.chunks.push({ t: e.t, text: cleanTranscript(e.text) });
   }
   const lines: Line[] = [];
   for (const r of runs) {
     if (!r.chunks.length) continue;
     let text = '', offs: { at: number; t: number }[] = [];
-    for (const c of r.chunks) { offs.push({ at: text.length, t: c.t }); text += c.text; }
+
+    for (const c of r.chunks) {
+      // separate generations (e.g. either side of a tool call) arrive without a space between sentences
+      const t = /[.!?]$/.test(text) && /^[A-Za-z]/.test(c.text) ? ' ' + c.text : c.text;
+      offs.push({ at: text.length, t: c.t }); text += t;
+    }
+    text = text.replace(/\((?:no audio|silence|inaudible)\)|<[^>]{0,20}>|\{[a-z ]{0,12}\}/gi, m => ' '.repeat(m.length));
     const tAt = (i: number) => { let t = offs[0].t; for (const o of offs) { if (o.at <= i) t = o.t; else break; } return t; };
     let cur: Line | null = null;
     for (const m of text.matchAll(/\S+/g)) {

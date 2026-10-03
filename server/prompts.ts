@@ -7,6 +7,9 @@ const cache = new Map<string, string>();
 export function prompt(name: string, slots: Record<string, string> = {}): string {
   let t = cache.get(name);
   if (t == null) { t = readFileSync(new URL(name + '.md', DIR), 'utf8'); if (process.env.NODE_ENV === 'production') cache.set(name, t); }
+  return fill(t, slots, name);
+}
+export function fill(t: string, slots: Record<string, string>, name = 'template'): string {
   return t.replace(/\{\{(\w+)\}\}/g, (_, k) => { if (!(k in slots)) throw new Error(`prompt ${name}: missing slot ${k}`); return slots[k]; });
 }
 export const system = (...names: string[]) => names.map(n => prompt(n)).join('\n\n---\n\n');

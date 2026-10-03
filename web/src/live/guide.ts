@@ -3,8 +3,9 @@
 import { GoogleGenAI, Modality, FunctionResponseScheduling, type LiveServerMessage, type Session } from '@google/genai';
 import type { Diagram, SessionEvent, SessionLog } from '../../../shared/schema';
 import { applyTool, type GuideState } from '../../../shared/session';
-import { execTool } from '../../../shared/executor';
-import { Mic, Speaker } from './audio';
+import { execTool, settle } from '../../../shared/executor';
+import { Mic, Speaker, toB64 } from './audio';
+import { EchoGate, toPcm16 } from '../../../shared/duplex';
 import { api } from '../api';
 
 export type GuideStatus = 'idle' | 'connecting' | 'live' | 'reconnecting' | 'closed' | 'error';
@@ -15,6 +16,9 @@ export interface GuideCallbacks {
 
 export class Guide {
   private session?: Session; private mic?: Mic; private speaker = new Speaker();
+  private batch: Float32Array[] = [];
+  /** Holds mic audio back while the guide is talking, unless the reader clearly talks over it. */
+  readonly gate = new EchoGate(f => this.queueMic(f), () => this.bargeIn());
   private t0 = 0; private handle?: string; private closing = false; private nCustom = 0;
   events: SessionEvent[] = [];
   readonly id = crypto.randomUUID();
@@ -37,6 +41,7 @@ export class Guide {
 
   private async connect() {
     const { token, model, config } = await api.liveToken(this.paperId);
+    this.nonBlocking = new Set(config.tools[0].functionDeclarations.filter((d: any) => d.behavior === 'NON_BLOCKING').map((d: any) => d.name));
     const ai = new GoogleGenAI({ apiKey: token, httpOptions: { apiVersion: 'v1alpha' } });
     this.session = await ai.live.connect({
       model, config: { ...config, responseModalities: [Modality.AUDIO], sessionResumption: { handle: this.handle } },
@@ -57,14 +62,35 @@ export class Guide {
   async setMic(on: boolean) {
     if (on && !this.mic) {
       this.mic = new Mic();
-      await this.mic.start(b64 => this.session?.sendRealtimeInput({ audio: { data: b64, mimeType: 'audio/pcm;rate=16000' } }), this.cb.onLevel);
-    } else if (!on && this.mic) { this.mic.stop(); this.mic = undefined; this.session?.sendRealtimeInput({ audioStreamEnd: true }); }
+      let lvl = 0;
+      await this.mic.start(f => {
+        let s = 0; for (let i = 0; i < f.length; i++) s += f[i] * f[i];
+        lvl = Math.max(Math.sqrt(s / f.length), lvl * 0.85); this.cb.onLevel?.(lvl);
+        const t = performance.now(); this.gate.push(f, t, this.speaker.levelAt(t));
+      });
+    } else if (!on && this.mic) { this.mic.stop(); this.mic = undefined; this.flushMic(); this.session?.sendRealtimeInput({ audioStreamEnd: true }); }
   }
+  /** Headphones: no echo to fear, so the reader may talk over the guide freely. */
+  setHeadphones(on: boolean) { this.gate.o.enabled = !on; }
+  // forwarded mic frames are batched into 100 ms messages
+  private queueMic(f: Float32Array) { this.batch.push(f); if (this.batch.length >= 5) this.flushMic(); }
+  private flushMic() {
+    if (!this.batch.length) return;
+    const n = this.batch.reduce((a, b) => a + b.length, 0), all = new Float32Array(n); let o = 0;
+    for (const b of this.batch) { all.set(b, o); o += b.length; }
+    this.batch = [];
+    this.session?.sendRealtimeInput({ audio: { data: toB64(toPcm16(all)), mimeType: 'audio/pcm;rate=16000' } });
+  }
+  /** After a barge-in, the rest of the interrupted answer may still stream in; don't play it. */
+  private dropTurn = false;
+  private bargeIn() { this.dropTurn = true; this.speaker.flush(); this.cb.onSpeaking?.(false); }
+  /** Stop button / Esc: cut the guide off and listen. */
+  interrupt() { this.bargeIn(); this.gate.playbackStopped(performance.now()); }
   get micOn() { return !!this.mic; }
-  setMuted(m: boolean) { this.speaker.muted = m; if (m) this.speaker.flush(); }
+  setMuted(m: boolean) { this.speaker.muted = m; if (m) { this.speaker.flush(); this.gate.playbackStopped(performance.now()); } }
 
   sendText(text: string) {
-    this.speaker.flush();
+    this.speaker.flush(); this.gate.playbackStopped(performance.now());
     this.emit({ t: this.now(), kind: 'you', text });
     this.session?.sendRealtimeInput({ text });
   }
@@ -77,12 +103,16 @@ export class Guide {
     const sc = m.serverContent;
     if (!sc) return;
     if (sc.inputTranscription?.text) this.emit({ t: this.now(), kind: 'you', text: sc.inputTranscription.text });
-    if (sc.outputTranscription?.text) this.emit({ t: this.now(), kind: 'guide', text: sc.outputTranscription.text });
-    for (const p of sc.modelTurn?.parts || []) if (p.inlineData?.data) {
-      this.speaker.play(p.inlineData.data); this.cb.onSpeaking?.(true);
+    if (sc.outputTranscription?.text) this.lastSpeech = this.now();
+    if (sc.outputTranscription?.text && !this.dropTurn) this.emit({ t: this.now(), kind: 'guide', text: sc.outputTranscription.text });
+    if (sc.interrupted || sc.turnComplete) this.dropTurn = false;
+    for (const p of sc.modelTurn?.parts || []) if (p.inlineData?.data && !this.dropTurn) {
+      const until = this.speaker.play(p.inlineData.data);
+      if (until != null) this.gate.playbackUntil(until);
+      this.cb.onSpeaking?.(true);
       clearTimeout(this.speakTimer); this.speakTimer = window.setTimeout(() => this.cb.onSpeaking?.(this.speaker.speaking), 400);
     }
-    if (sc.interrupted) this.speaker.flush();
+    if (sc.interrupted) { this.speaker.flush(); this.gate.playbackStopped(performance.now()); }
     if (sc.turnComplete) this.emit({ t: this.now(), kind: 'turn' });
   }
 
@@ -91,12 +121,16 @@ export class Guide {
     this.emit({ t: this.now(), kind: 'tool', name, args: args as Record<string, unknown>, result });
     if (!(result as any)?.error || name === 'scratch_ready') this.setState(applyTool(this.state, name, args, result));
   };
+  private lastSpeech = -1;
+  private nonBlocking = new Set<string>();
   private async runTool(id: string, name: string, raw: unknown) {
+    const t0 = this.now();
     const r = await execTool({
       diagrams: this.diagrams, state: () => this.state, record: this.record, nextCustomId: () => `c${++this.nCustom}`,
       scratch: a => api.scratch(this.paperId, a), section: sid => api.section(this.paperId, sid),
     }, name, raw);
-    this.session?.sendToolResponse({ functionResponses: [{ id, name, response: r.response, ...(r.background ? { scheduling: FunctionResponseScheduling.WHEN_IDLE } : {}) }] });
+    const out = await settle(r, this.nonBlocking.has(name), t0 * 1000, t => this.lastSpeech * 1000 > t, () => this.now() * 1000);
+    this.session?.sendToolResponse({ functionResponses: [{ id, name, response: out.response, ...(out.scheduling ? { scheduling: FunctionResponseScheduling[out.scheduling] } : {}) }] });
   }
 
   async stop(): Promise<SessionLog> {
