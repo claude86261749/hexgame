@@ -9,21 +9,26 @@ Status: plan only. Nothing is implemented yet.
 
 ---
 
-## 0. Gemini access check (done before planning)
+## 0. Gemini access check (verified)
+
+The key is read from env var **`AI_STUDIO_KEY`**. It is sent as the `x-goog-api-key` header and is never put in a URL.
+Probe run on 2026-10-03 with `@google/genai`:
 
 | Check | Result |
 |---|---|
-| Network route to `generativelanguage.googleapis.com` | OK (request reached Google) |
-| API key in environment | **Missing**: no `GEMINI_API_KEY` / `GOOGLE_API_KEY` set; API answered `403 PERMISSION_DENIED: unregistered callers` |
-| `gemini-3.8-flash`, `gemini-3.8-live` model IDs | **Unverified** (needs the key) |
+| `models.list` | 200 OK; 61 models visible |
+| `gemini-3.8-flash` | exists; 1,048,576 in / 65,536 out; `generateContent`, `createCachedContent`, `batchGenerateContent` |
+| flash JSON mode with `responseSchema` | valid schema-conforming JSON in ~2.6 s (thinking is on by default: 471 thought tokens for a tiny prompt, so set a per-stage thinking budget) |
+| `gemini-3.8-live` | exists; 131,072 in / 65,536 out; `bidiGenerateContent` |
+| live: text in → function call | `show_diagram({id:"g2", part:"pretraining"})` arrives **as its own turn, before any speech** (fits the "draw, then talk" rule) |
+| live: after tool response | spoken reply, AUDIO 24 kHz PCM (~136 KB), and `outputAudioTranscription` text ("Here is the pretraining step of the training pipeline.") |
+| ephemeral token (`authTokens.create`, v1alpha) | created; a Live session opened **with the token only** has the same tool call, audio and transcription → the browser connects directly; no relay needed |
+| latency | live session connect → tool call → end of spoken turn: ~4.4 s (API key), ~5.8 s (ephemeral) |
 
-First step once a key exists (`npm run probe`):
-1. `models.list`: confirm both IDs exist, and read their token limits and supported methods.
-2. flash: run one `generateContent` with `responseSchema` (JSON mode) to confirm structured output works.
-3. live: open a `BidiGenerateContent` session with one function declaration, send text,
-   and confirm a tool call plus output transcription come back. Then mint an ephemeral
-   token (`authTokens.create`) and connect with it.
-4. Write the results to `server/model-capabilities.json`. Model IDs live in config, never hard-coded.
+Also available if we need them: `gemini-3.8-live-extended-thinking` (a slower, deeper guide), `gemini-3.8-flash-tts`,
+`gemini-embedding-2` (section retrieval for long papers), and `gemini-3.5-transcribe-live`.
+
+`npm run probe` (M0) turns this check into a script and writes `server/model-capabilities.json`. Model IDs live in config.
 
 ---
 
@@ -52,7 +57,7 @@ Everything paper-specific in the prototype is hand-written SVG. **Making it data
 
 ```
 /shared      zod schemas + TS types: PaperDoc, Digest, DiagramSpec, Overlay, Tool args, SessionLog
-/server      Node 22 + Hono. Holds GEMINI_API_KEY. Never ships it to the browser.
+/server      Node 22 + Hono. Holds the key (`AI_STUDIO_KEY`). Never ships it to the browser.
   ingest/      .md → PaperDoc
   generate/    flash pipeline (digest → plan → specs → validate/repair → fact-check)
   live/        ephemeral-token minting; WS relay fallback
@@ -247,10 +252,9 @@ Each call logs a JSONL line: stage, latency, tokens, validation outcome and repa
 
 ## 11. Risks and open questions
 
-- **API key missing.** Add `GEMINI_API_KEY` to the cloud environment's settings. Until then, work up to M1 can proceed
-  with the mock and fixture.
-- **Model IDs and Live features are unverified**: ephemeral tokens, non-blocking function calls and transcription on
-  `gemini-3.8-live`. The relay fallback is planned.
+- **Still unverified on `gemini-3.8-live`**: `behavior: NON_BLOCKING` function calls (needed for `draw_from_scratch`),
+  context-window compression and session resumption. These are checked in M0. If non-blocking calls are unsupported,
+  the fallback is to return immediately and send the finished spec as a client text turn.
 - **Quality of free-form geometry** is the main quality risk, so the plan leans on typed templates and auto-layout.
 - **The sim whitelist** means some papers get no "try it" diagram. That is better than an unfaithful toy.
 - **"Papers you have read"** needs a reader library. Without one, the landscape falls back to citations.
