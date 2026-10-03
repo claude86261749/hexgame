@@ -23,6 +23,8 @@ export interface ControllerProps {
   lens: Lens | null;
   /** Bumped by "Start over": snap everything and frame the island again. */
   epoch: number;
+  /** Tiles whose paper has a live guide; their labels carry a red dot. */
+  live: ReadonlySet<string>;
 }
 
 const KEY_PAN = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] } as const;
@@ -138,7 +140,7 @@ export class MapController {
     const sea = g('--sea');
     this.PAL = {
       sea, fog: g('--fog'), fogLine: g('--fog-line'), rev: g('--rev'), shade: g('--shade'),
-      ink: g('--ink'), ink2: g('--ink-2'), pill: g('--pill'), accent: g('--accent'),
+      ink: g('--ink'), ink2: g('--ink-2'), pill: g('--pill'), accent: g('--accent'), live: g('--live'),
       dark: sea[0] + sea[1] + sea[2] < 300,
     };
   };
@@ -248,7 +250,7 @@ export class MapController {
       sprites: this.sprites, order: this.order, sea: props.view.sea, markers: props.view.markers,
       focal: this.sprites[props.view.focal.ti], cur: this.sprite(props.game.cur)!,
       hover: this.hoverId ? this.sprite(this.hoverId)! : null,
-      move: this.move, moving: this.moving, trails: props.game.trails, lens: props.lens,
+      move: this.move, moving: this.moving, trails: props.game.trails, lens: props.lens, live: props.live,
     });
   }
 

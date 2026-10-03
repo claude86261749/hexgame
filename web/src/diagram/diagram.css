@@ -1,0 +1,71 @@
+/* Diagram drawing. Shared by every diagram type; colours come from ../theme.css. */
+.stage .tx{font:500 11.5px var(--sans);fill:var(--ink)}
+.stage .th{font-weight:700;font-size:13px}
+.stage .tb{font-weight:700;font-size:12px}
+.stage .tl{font-size:12.5px}
+.stage .tr{font:400 13px var(--serif);fill:var(--ink-2)}
+.stage .tm{fill:var(--muted)}
+.stage .ta{fill:var(--accent)}
+.stage .tk{fill:var(--mark);font-weight:700}
+.stage .tbd{font-weight:700;font-size:10px}
+.stage .halo{paint-order:stroke;stroke:var(--sheet);stroke-width:4px;stroke-linejoin:round}
+.s-ink{fill:none;stroke:var(--ink);stroke-width:1.4}
+.s-mut{fill:none;stroke:var(--muted);stroke-width:1}
+.s-line{fill:none;stroke:var(--line-2);stroke-width:1}
+.s-acc{fill:none;stroke:var(--accent);stroke-width:1.9}
+.s-dash{stroke-dasharray:4 4}
+.f-sheet{fill:var(--sheet)} .f-acc{fill:var(--accent)} .f-ink{fill:var(--ink)} .f-mut{fill:var(--muted)} .f-soft{fill:var(--accent-soft)}
+.m-s{fill:none;stroke:var(--mark);stroke-width:2}
+.m-f{fill:var(--mark-fill);stroke:var(--mark);stroke-width:1.2}
+.m-fill{fill:var(--mark)}
+.m-box{fill:var(--sheet);stroke:var(--mark);stroke-width:1.6}
+.hatch2-l{stroke:var(--line-2);stroke-width:1.5}
+.mk-ink{fill:none;stroke:var(--ink);stroke-width:1.6} .mk-acc{fill:none;stroke:var(--accent);stroke-width:1.8} .mk-mut{fill:none;stroke:var(--muted);stroke-width:1.4} .mk-mark{fill:none;stroke:var(--mark);stroke-width:1.8}
+.seg-0{fill:var(--img-a)} .seg-1{fill:var(--img-b)} .seg-2{fill:var(--img-c)} .seg-3{fill:var(--img-d)}
+.pcell{cursor:crosshair;stroke:var(--sheet);stroke-width:1}
+.scrub{fill:transparent;cursor:ew-resize}
+.stp.fresh{animation:stp .45s ease both}
+@keyframes stp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.node{cursor:pointer;outline:none}
+.node .box{fill:var(--sheet);stroke:var(--ink);stroke-width:1.4}
+.node.k-accent .box{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.8}
+.node.k-input .box{stroke:var(--muted);stroke-dasharray:3 3}
+.node.k-muted .box{stroke:var(--line-2)}
+.node.k-muted text{fill:var(--muted)}
+.node.k-output .box{stroke-width:2}
+.node.marked .box{fill:var(--mark-fill);stroke:var(--mark);stroke-width:1.6}
+.node.sel:hover .box{stroke:var(--accent)}
+.node.on .box{stroke:var(--accent);stroke-width:2.4;fill:var(--accent-soft)}
+.node:focus-visible .box{stroke:var(--accent);stroke-width:3}
+.node .hit{fill:transparent;stroke:var(--line-2);stroke-width:1;stroke-dasharray:3 4}
+.node:hover .hit{stroke:var(--accent)}
+.node.on .hit{fill:var(--accent-soft);stroke:var(--accent);stroke-dasharray:none;stroke-width:1.6}
+.node:not(.sel){cursor:default}
+.node:not(.sel) .hit{stroke:none}
+.still .node{cursor:default;pointer-events:none}
+.still .node.on .box{stroke:var(--ink);stroke-width:1.4;fill:var(--sheet)}
+.row.strong rect.bg{fill:var(--accent-soft)}
+
+.bt{cursor:pointer;outline:none}
+.bt .lift{transition:transform .16s ease}
+.bt:hover .lift{transform:translateY(-3px)}
+.bt .top{fill:var(--c);stroke:rgba(10,12,22,.32);stroke-width:1}
+.bt .s1{fill:color-mix(in srgb,var(--c),#0a0c16 24%)}
+.bt .s2{fill:color-mix(in srgb,var(--c),#0a0c16 40%)}
+.bt .s3{fill:color-mix(in srgb,var(--c),#0a0c16 32%)}
+.bt text{pointer-events:none;text-anchor:middle;fill:var(--on-tile);font-family:var(--sans)}
+.bt .nm{font-weight:700;font-size:12px}
+.bt .yr{font-weight:500;font-size:10px;opacity:.72}
+.bt.k-cur{--c:var(--ink);cursor:default}
+.bt.k-cur:hover .lift{transform:none}
+.bt.k-cur text{fill:var(--sheet)}
+.bt.k-cur .nm{font-size:14px}
+.bt.k-fog .top{fill:url(#hatch2);stroke:var(--ink-2);stroke-dasharray:5 4;stroke-width:1.2}
+.bt.k-fog text{fill:var(--ink);font-family:var(--serif);font-style:italic}
+.bt.k-fog .nm{font-weight:600;font-size:13px}
+.bt:focus-visible .top{stroke:var(--accent);stroke-width:3;stroke-dasharray:none}
+.still .bt{pointer-events:none}
+.selring{fill:none;stroke:var(--accent);stroke-width:3;stroke-linejoin:round;pointer-events:none}
+.lk{stroke:var(--accent);stroke-width:1.8;stroke-dasharray:3 4;pointer-events:none}
+.lkd{fill:var(--accent);pointer-events:none}
+

@@ -6,10 +6,11 @@ import { GradientsBody } from '../sheets/GradientsSheet';
 import { LogBody } from '../sheets/LogSheet';
 import { OpenBody, PaperBody, PaperFoot } from '../sheets/PaperSheet';
 import { ReportBody } from '../sheets/ReportSheet';
+import { LiveBody } from '../sheets/LiveSheet';
 import { CloseIcon, Hx } from './bits';
 import { useGame } from './context';
 
-const TITLES: Record<Exclude<SheetMode, 'paper'>, string> = { exp: 'Expeditions', log: 'Log', grad: 'Gradients', rep: 'Run report' };
+const TITLES: Record<Exclude<SheetMode, 'paper'>, string> = { live: 'Live guide', exp: 'Expeditions', log: 'Log', grad: 'Gradients', rep: 'Run report' };
 
 /** The popup: a paper's first page, or the expeditions, log, gradients and run report. */
 export function Sheet({ mode, pop, onClose }: { mode: SheetMode | null; pop: number; onClose(): void }) {
@@ -29,7 +30,7 @@ export function Sheet({ mode, pop, onClose }: { mode: SheetMode | null; pop: num
     }
   } else if (mode) {
     title = <p className="sheet-title big" id="sheet-title">{TITLES[mode]}</p>;
-    content = mode === 'exp' ? <ExpeditionsBody /> : mode === 'log' ? <LogBody /> : mode === 'grad' ? <GradientsBody /> : <ReportBody />;
+    content = mode === 'live' ? <LiveBody /> : mode === 'exp' ? <ExpeditionsBody /> : mode === 'log' ? <LogBody /> : mode === 'grad' ? <GradientsBody /> : <ReportBody />;
   }
   return (
     /* keyed by pop: each open replays the pop-in and starts at the top, while

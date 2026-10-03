@@ -1,0 +1,60 @@
+/* One theme for the whole app, taken from the hex map. Colour on the map means one thing only:
+   a paper you have read. Everything else is blank paper (uncharted) or plaster grey (revealed).
+   The explainer's tokens (--bg, --sheet, --muted, --mark…) are derived from the map's. */
+:root{
+  --sea:#E4E9EF; --fog:#F8F9FB; --fog-line:#AEB8C6; --rev:#C5CCD7; --shade:#15233B;
+  --panel:#FFFFFF; --panel-2:#F2F4F8; --ink:#15233B; --ink-2:#5B6880; --line:#D8DDE6;
+  --accent:#B81F68; --pill:#FFFFFF;
+  --serif:"STIX Two Text","Times New Roman",Times,serif;
+  --sans:"IBM Plex Sans Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  /* explainer */
+  --body:#33405A; --mark:#C2560F; --mark-fill:#FFE2B8; --ok:#1F7A4A; --err:#B42318; --live:#D9342B;
+  --t-lineage:#6fd39a; --t-component:#f3c64b; --t-compare:#f28b70; --t-down:#7cc4f0; --on-tile:#141824;
+  --img-a:#bcd9f5; --img-b:#e9a15d; --img-c:#5fae7a; --img-d:#cdbd8a;
+  --hexline:rgba(21,35,59,.07);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sea:#111925; --fog:#1A2330; --fog-line:#3B4A60; --rev:#3A485D; --shade:#04070D;
+    --panel:#161F2C; --panel-2:#1E2938; --ink:#E9EDF4; --ink-2:#9CA9BB; --line:#2C394A;
+    --accent:#FF86BC; --pill:#0E151F;
+    --body:#C9D2DF; --mark:#FFA24D; --mark-fill:#5A3A12; --ok:#5FD394; --err:#FF8A7A; --live:#FF6B5E;
+    --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460;
+    --hexline:rgba(233,237,244,.05);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sea:#111925; --fog:#1A2330; --fog-line:#3B4A60; --rev:#3A485D; --shade:#04070D;
+  --panel:#161F2C; --panel-2:#1E2938; --ink:#E9EDF4; --ink-2:#9CA9BB; --line:#2C394A;
+  --accent:#FF86BC; --pill:#0E151F;
+  --body:#C9D2DF; --mark:#FFA24D; --mark-fill:#5A3A12; --ok:#5FD394; --err:#FF8A7A; --live:#FF6B5E;
+  --img-a:#6f93b8; --img-b:#c98447; --img-c:#4b8f62; --img-d:#8f8460;
+  --hexline:rgba(233,237,244,.05);
+  color-scheme:dark;
+}
+:root{
+  /* aliases the diagram renderer and explainer use */
+  --bg:var(--sea); --sheet:var(--panel); --muted:var(--ink-2); --line-2:var(--fog-line);
+  --accent-soft:color-mix(in srgb,var(--accent) 10%,transparent); --hover:color-mix(in srgb,var(--ink) 6%,transparent);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--sea);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+#root{height:100%}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;vertical-align:-1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{from{opacity:.3}to{opacity:1}}
+.err{color:var(--err)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}

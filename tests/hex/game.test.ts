@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import * as G from '../src/game/state';
-import { getMapView } from '../src/world/mapView';
-import { WORLD } from '../src/world/world';
+import * as G from '../../web/src/hex/game/state';
+import { getMapView } from '../../web/src/hex/world/mapView';
+import { WORLD } from '../../web/src/hex/world/world';
 
 const T0 = 1000;
 const nb = (s: G.GameState, id: string) => getMapView(s.focal).at[WORLD.byId[id].ti].nb.filter(Boolean).map(n => n!.id);

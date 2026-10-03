@@ -1,5 +1,5 @@
 // The live guide session: connects to gemini-3.8-live with an ephemeral token, streams audio both ways,
-// executes tool calls against the diagram state, and records everything for replay.
+// executes tool calls against the diagram state, and keeps a log of the session (saved when it ends).
 import { GoogleGenAI, Modality, FunctionResponseScheduling, type LiveServerMessage, type Session } from '@google/genai';
 import type { Diagram, SessionEvent, SessionLog } from '../../../shared/schema';
 import { applyTool, type GuideState } from '../../../shared/session';
@@ -29,14 +29,18 @@ export class Guide {
   private emit(e: SessionEvent) { this.events.push(e); this.cb.onEvent(e); }
   private setState(s: GuideState) { this.state = s; this.cb.onState(s); }
 
-  async start(opts: { voice: boolean }) {
+  async start(opts: { voice: boolean; onScreen?: string }) {
     this.speaker.unlock();
     this.t0 = performance.now();
     this.cb.onStatus('connecting');
     await this.connect();
     if (opts.voice) await this.setMic(true);
     // a silent nudge so the guide greets the reader; not recorded as a reader line
-    this.session!.sendClientContent({ turns: [{ role: 'user', parts: [{ text: '(The reader has opened the guide. The first diagram is on screen.)' }] }], turnComplete: true });
+    this.session!.sendClientContent({ turns: [{ role: 'user', parts: [{ text: `(The reader has opened the guide. On screen: ${opts.onScreen || 'the first diagram'}.)` }] }], turnComplete: true });
+  }
+  /** The reader moved to another diagram by hand: tell the guide without asking it to answer. */
+  lookingAt(what: string) {
+    try { this.session?.sendClientContent({ turns: [{ role: 'user', parts: [{ text: `(The reader opened ${what}.)` }] }], turnComplete: false }); } catch { /* not connected yet */ }
   }
 
   private async connect() {

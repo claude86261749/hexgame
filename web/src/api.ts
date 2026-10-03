@@ -8,7 +8,6 @@ async function j<T>(r: Response): Promise<T> {
 const post = (url: string, body: unknown) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 export interface PaperCard { id: string; title: string; full?: string; field?: string; gist?: string; stage: string; sessions: number }
-export interface SessionCard { id: string; startedAt: string; duration: number; title?: string; questions: string[] }
 
 export const api = {
   papers: () => fetch('/api/papers').then(r => j<PaperCard[]>(r)),
@@ -20,7 +19,5 @@ export const api = {
   section: (id: string, sid: string) => fetch(`/api/papers/${id}/sections/${encodeURIComponent(sid)}`).then(r => j<{ id: string; title: string; text: string }>(r)),
   liveToken: (id: string) => post(`/api/papers/${id}/live`, {}).then(r => j<{ token: string; model: string; config: any }>(r)),
   scratch: (id: string, body: Record<string, unknown>) => post(`/api/papers/${id}/scratch`, body).then(r => j<{ spec: Diagram; targets: string[] }>(r)),
-  sessions: (id: string) => fetch(`/api/papers/${id}/sessions`).then(r => j<SessionCard[]>(r)),
-  session: (id: string, sid: string) => fetch(`/api/papers/${id}/sessions/${sid}`).then(r => j<SessionLog>(r)),
   saveSession: (id: string, log: SessionLog) => post(`/api/papers/${id}/sessions`, log).then(r => j<{ id: string }>(r)),
 };

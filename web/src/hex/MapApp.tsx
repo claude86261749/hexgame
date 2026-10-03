@@ -11,11 +11,25 @@ import * as G from './game/state';
 import type { GameState, SheetMode, ToastEvent } from './game/state';
 import { getMapView } from './world/mapView';
 import { WORLD } from './world/world';
+import type { PaperCard } from '../api';
+
+const norm = (s = '') => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+/** Which tile each explained paper stands on: by short name, id or full title. */
+function matchTiles(papers: PaperCard[]): Record<string, PaperCard> {
+  const out: Record<string, PaperCard> = {};
+  for (const p of papers) {
+    if (p.stage !== 'done') continue;
+    const keys = new Set([norm(p.title), norm(p.full)].filter(Boolean));
+    const t = WORLD.papers.find(t => keys.has(norm(t.s)) || keys.has(norm(t.id)) || keys.has(norm(t.t)));
+    if (t) out[t.id] = p;
+  }
+  return out;
+}
 
 /** Q W E A S D: indices into DIRS, the six flat-top neighbours. */
 const KEYDIR: Record<string, number> = { w: 2, e: 1, d: 0, s: 5, a: 4, q: 3 };
 
-export function App() {
+export function MapApp({ papers, refreshPapers }: { papers: PaperCard[]; refreshPapers(): void }) {
   const [game, setGame] = useState<GameState>(() => G.load() ?? G.freshGame(performance.now()));
   const [epoch, setEpoch] = useState(0);
   const [sheet, setSheet] = useState<SheetMode | null>(null);
@@ -24,6 +38,8 @@ export function App() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const ctl = useRef<MapController | null>(null);
   const view = getMapView(game.focal);
+  const liveByTile = useMemo(() => matchTiles(papers), [papers]);
+  const live = useMemo(() => new Set(Object.keys(liveByTile)), [liveByTile]);
 
   /* actions can come from the canvas's frame loop, so they work on a ref of the latest state */
   const gameRef = useRef(game);
@@ -45,7 +61,7 @@ export function App() {
   const closeSheet = useCallback(() => setSheet(null), []);
 
   const api: GameApi = useMemo(() => ({
-    game, view, lens,
+    game, view, lens, papers, liveByTile, refreshPapers,
     travel: id => ctl.current?.travel(id),
     markRead: id => {
       const { state, toasts } = G.markRead(gameRef.current, id, performance.now());
@@ -56,7 +72,7 @@ export function App() {
     refocus: id => { if (!ctl.current?.busy) apply(s => G.refocus(s, id, performance.now())); },
     toggleLens: l => setLens(cur => (cur && cur.type === l.type && JSON.stringify(cur) === JSON.stringify(l) ? null : l)),
     openSheet,
-  }), [game, view, lens, apply, pushToasts, openSheet]);
+  }), [game, view, lens, papers, liveByTile, refreshPapers, apply, pushToasts, openSheet]);
 
   const events = {
     arrive: (id: string) => { apply(s => G.arrive(s, id, performance.now())); openSheet('paper'); },
@@ -99,7 +115,7 @@ export function App() {
   return (
     <GameContext.Provider value={api}>
       <main className={'map' + (sheet ? ' has-sheet' : '')}>
-        <MapCanvas game={game} view={view} lens={lens} epoch={epoch} events={events} controller={ctl} />
+        <MapCanvas game={game} view={view} lens={lens} epoch={epoch} live={live} events={events} controller={ctl} />
         <Hud />
         <Toolbar
           sheet={sheet}

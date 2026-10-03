@@ -32,6 +32,7 @@ export interface Scene {
   moving: boolean;
   trails: boolean;
   lens: Lens | null;
+  live: ReadonlySet<string>;
 }
 
 const ANG = [0, 60, 120, 180, 240, 300].map(d => d * Math.PI / 180), COS = ANG.map(Math.cos), SIN = ANG.map(Math.sin);
@@ -388,14 +389,17 @@ function drawLabels(sc: Scene) {
   for (const sp of sc.order) {
     if (!sp.dseen) continue;
     const here = sp === sc.cur, hov = sp === sc.hover, read = sp.dread;
-    if (few && !here && !hov && !read) continue;
+    if (few && !here && !hov && !read && !sc.live.has(sp.t.id)) continue;
     const sx = (sp.wx - cam.x) * cam.z + W / 2, sy = (sp.wy - sp.h + 16 - cam.y) * cam.z + H / 2;
     if (sx < -60 || sx > W + 60 || sy < -20 || sy > H + 20) continue;
-    const txt = sp.t.s, w = textWidth(ctx, txt, fs) + fs * 0.9, hgt = fs + 6.5;
+    const txt = sp.t.s, live = sc.live.has(sp.t.id), dot = live ? fs * 0.75 : 0;
+    const w = textWidth(ctx, txt, fs) + fs * 0.9 + dot, hgt = fs + 6.5;
     rr(ctx, sx - w / 2, sy - hgt / 2, w, hgt, 4);
     ctx.globalAlpha = Math.min(1, sp.da * 1.4);
-    ctx.fillStyle = here ? css(PAL.ink) : css(PAL.pill, read || hov ? 0.94 : 0.5); ctx.fill();
-    ctx.fillStyle = here ? css(PAL.pill) : css(read || hov ? PAL.ink : PAL.ink2); ctx.fillText(txt, sx, sy + 0.5);
+    ctx.fillStyle = here ? css(PAL.ink) : css(PAL.pill, read || hov || live ? 0.94 : 0.5); ctx.fill();
+    /* a live guide is waiting for this paper */
+    if (live) disc(ctx, sx - w / 2 + fs * 0.45 + 2.5, sy + 0.5, fs * 0.24, css(PAL.live));
+    ctx.fillStyle = here ? css(PAL.pill) : css(read || hov ? PAL.ink : PAL.ink2); ctx.fillText(txt, sx + dot / 2, sy + 0.5);
     ctx.globalAlpha = 1;
   }
 }

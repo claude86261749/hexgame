@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { assign, cellKey, hexDist, jacobi } from '../src/engine';
-import { getMapView } from '../src/world/mapView';
-import { WORLD } from '../src/world/world';
+import { assign, cellKey, hexDist, jacobi } from '../../web/src/hex/engine';
+import { getMapView } from '../../web/src/hex/world/mapView';
+import { WORLD } from '../../web/src/hex/world/world';
 
 describe('math', () => {
   test('jacobi recovers eigenpairs of a symmetric matrix', () => {

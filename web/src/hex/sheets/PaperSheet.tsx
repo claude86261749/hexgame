@@ -115,6 +115,21 @@ function Trails({ t }: { t: PaperTile }) {
   );
 }
 
+function LiveBox({ t }: { t: PaperTile }) {
+  const { liveByTile } = useGame();
+  const p = liveByTile[t.id];
+  if (!p) return null;
+  return (
+    <div className="livebox">
+      <p><b>A live guide knows this paper.</b> Ask it anything about {t.s} out loud. It answers in a few sentences and draws on the paper's diagrams while it talks.</p>
+      <p className="row">
+        <a className="primary live-go" href={`#/p/${p.id}/live`}><i aria-hidden="true" />Start a live session</a>
+        <a className="quiet" href={`#/p/${p.id}`}>Open the diagrams first</a>
+      </p>
+    </div>
+  );
+}
+
 export function PaperBody({ t }: { t: PaperTile }) {
   const { game, view, refocus } = useGame();
   const focal = view.focal;
@@ -134,6 +149,7 @@ export function PaperBody({ t }: { t: PaperTile }) {
           <p className="authors">{t.a}</p>
           <p className="venue">{venue}</p>
         </header>
+        <LiveBox t={t} />
         <ul className="where">
           <li><span className="ico"><Hx c={css(view.at[t.ti].col)} /></span><span>{themeLine(t)}</span></li>
           <li><span className="ico"><ArrowIcon /></span><span>{bearingLine(view, t)}</span></li>

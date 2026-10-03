@@ -13,7 +13,8 @@ interface Props {
 }
 
 export function Toolbar({ sheet, toggleSheet, recenter, toggleTrails, liftFog, reset }: Props) {
-  const { game } = useGame();
+  const { game, papers } = useGame();
+  const nlive = papers.filter(p => p.stage === 'done').length;
   const nread = WORLD.papers.filter(t => game.read[t.id]).length;
   const nexp = WORLD.expeditions.filter(ex => ex.steps.every(id => game.read[id])).length;
   const allSeen = WORLD.tiles.every(t => game.seen[t.id]);
@@ -36,6 +37,9 @@ export function Toolbar({ sheet, toggleSheet, recenter, toggleTrails, liftFog, r
   );
   return (
     <div className="tools" role="toolbar" aria-label="Map controls">
+      <button type="button" className="live-btn" aria-pressed={sheet === 'live'} onClick={() => toggleSheet('live')}>
+        <i aria-hidden="true" />Live guide <span className="cnt">{nlive}</span>
+      </button>
       {modeButton('exp', 'Expeditions', `${nexp}/${WORLD.expeditions.length}`)}
       {modeButton('log', 'Log', `${nread}/${WORLD.papers.length}`)}
       {modeButton('grad', 'Gradients')}

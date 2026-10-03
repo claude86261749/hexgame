@@ -28,7 +28,7 @@ export interface Sprite {
 }
 
 export interface Palette {
-  sea: RGB; fog: RGB; fogLine: RGB; rev: RGB; shade: RGB; ink: RGB; ink2: RGB; pill: RGB; accent: RGB;
+  sea: RGB; fog: RGB; fogLine: RGB; rev: RGB; shade: RGB; ink: RGB; ink2: RGB; pill: RGB; accent: RGB; live: RGB;
   dark: boolean;
 }
 

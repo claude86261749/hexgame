@@ -25,7 +25,7 @@ export interface GameState {
   dueRead: Record<string, number>;
 }
 
-export type SheetMode = 'paper' | 'exp' | 'log' | 'grad' | 'rep';
+export type SheetMode = 'paper' | 'live' | 'exp' | 'log' | 'grad' | 'rep';
 export interface ToastEvent { title: string; text: string; mode: SheetMode }
 
 export const START = 'dinov3';

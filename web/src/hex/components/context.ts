@@ -2,11 +2,16 @@ import { createContext, useContext } from 'react';
 import type { Lens } from '../canvas/types';
 import type { GameState, SheetMode } from '../game/state';
 import type { MapView } from '../world/mapView';
+import type { PaperCard } from '../../api';
 
 export interface GameApi {
   game: GameState;
   view: MapView;
   lens: Lens | null;
+  /** Papers that have been turned into diagrams with a live guide, and the tiles they stand on. */
+  papers: PaperCard[];
+  liveByTile: Record<string, PaperCard>;
+  refreshPapers(): void;
   /** Walk to a tile (or open it, if you stand on it). */
   travel(id: string): void;
   markRead(id: string): void;

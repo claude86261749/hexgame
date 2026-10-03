@@ -1,10 +1,13 @@
-# Papers, explained in diagrams
+# Related Work, live
 
-Turn any research paper (as Markdown) into a short sequence of interactive diagrams, plus a live guide you can talk to that draws new diagrams for your questions. React front end, a small Node server, `gemini-3.8-flash` for generating diagrams, `gemini-3.8-live` for the spoken guide.
+One app with two halves:
 
-The DINOv3 prototype this grew from is the design reference. Everything paper-specific is now generated.
+- **The map.** A hex-crawl through the literature around DINOv3. 78 papers sit on an island of hex tiles. You walk from tile to tile, and a tile gets its colour only when you mark its paper as read.
+- **The live guide.** Any paper that has been turned into diagrams can be talked through, live, by voice. The guide answers in a few spoken sentences and works the diagrams while it talks: it opens the right one, marks it up in orange, or draws a new one for your question.
 
-> This repository holds two independent projects. This README covers the paper-diagrams app at the root. `hextile_src/` is a separate React project (the Related Work hex-crawl) with its own `package.json` and README; install, run and test it from inside that folder. Neither project imports from the other.
+The two meet on the map. A red dot on a tile's label means a live guide knows that paper; its popup has **Start a live session**. The **Live guide** button in the toolbar lists every paper with a guide and lets you add one. The whole app uses the map's theme.
+
+React front end, a small Node server, `gemini-3.8-flash` for generating diagrams, `gemini-3.8-live` for the spoken guide.
 
 ## Run it
 
@@ -15,7 +18,7 @@ npm run probe                    # checks the key, both models, JSON schema outp
 npm run dev                      # API on :8787, app on http://localhost:5173
 ```
 
-Two papers come pre-generated in `data/papers/` (DINOv3 and DeepSeek-R1), each with a recorded guide session to play back. To add a paper, drop a `.md` file on the library page, or:
+Two papers come pre-generated in `data/papers/`: DINOv3, which stands on the map, and DeepSeek-R1, which does not. To add a paper, drop a `.md` file in the map's **Live guide** sheet, or:
 
 ```bash
 npm run fetch:arxiv -- 2508.10104 papers/dinov3.md   # arXiv HTML → Markdown (math kept as $…$)
@@ -23,6 +26,23 @@ npm run ingest -- papers/dinov3.md [--force]          # generate from the comman
 ```
 
 Production: `npm run build && npm start` (serves `dist/` and the API on one port).
+
+## Routes and screens
+
+| Route | Screen |
+|---|---|
+| `#/` | The map. Toolbar: **Live guide**, Expeditions, Log, Gradients, Run report. Progress on the map is saved in `localStorage`. |
+| `#/p/<id>` | One paper, set up for a live session: its diagrams on the left, the diagram and its notes in the middle, the live guide on the right. |
+| `#/p/<id>/live` | The same, with a voice session started on arrival. This is where **Start a live session** links. |
+
+In a live session:
+
+- Speak, or type. Each question that gets its own diagram is kept under **Drawn in this session**.
+- Talk over the guide to interrupt it, or press Esc. On speakers the guide only stops for a clear voice; tick **Headphones** to interrupt freely.
+- You can move between diagrams yourself. The guide is told which one you opened (`Guide.lookingAt`), so the next answer starts from it.
+- When a session ends it is saved under `data/papers/<id>/sessions/`, for evals. The app does not replay sessions.
+
+On the map: click a grey tile to walk there and open its paper; <kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> walk, <kbd>R</kbd> marks as read, <kbd>Esc</kbd> closes the popup; drag to pan, scroll or pinch to zoom.
 
 ## How it works
 
@@ -46,7 +66,8 @@ paper.md ─ ingest ─▶ PaperDoc (sections with stable ids: s4.2, sA.1, refs)
   - On a barge-in it forwards 0.5 s of preroll and drops the rest of the interrupted answer. Stop / Esc does the same by hand.
   - A Headphones toggle turns the gate off.
   - The server also sets Gemini's start-of-speech sensitivity to low.
-- **Sessions replay exactly.** A session is a timed log of transcript chunks and tool calls. The same reducer (`shared/session.ts`) drives the live screen and replay, so the player rebuilds what the reader saw at any moment.
+- **One reducer for guide state.** `shared/session.ts` applies each tool call to the screen state. The browser uses it live; the live eval uses it to check what the reader would have seen.
+- **The map engine** (`web/src/hex/engine/`) is pure TypeScript with no DOM: affinity from concepts and citations, a diffusion map for the gradients, k-means themes, PageRank elevation, then a hex layout per focal paper. A paper on the map is matched to a generated paper by its short name.
 
 ## Layout
 
@@ -55,9 +76,10 @@ paper.md ─ ingest ─▶ PaperDoc (sections with stable ids: s4.2, sA.1, refs)
 | `prompts/` | System prompts: `style` (house voice), `digest`, `plan`, `spec` + `types/*` (per-type guides with worked examples), `repair`, `factcheck`, `scratch`, `live` |
 | `shared/` | Schemas, layout, overlays, tool declarations, executor, session reducer (used by both server and browser) |
 | `server/` | Ingestion, model harness (`gemini.ts`: retries, cache, logs, mock mode, repair loop), pipeline, validation, live config, HTTP API |
-| `web/src/` | React app: library, generation progress, reader (three columns as in the prototype), live guide client (`live/`), renderer (`diagram/Stage.tsx`) |
-| `eval/` | `run.ts` pipeline eval over a corpus, `live.ts` scripted live-guide eval (saves a replayable session), `shots.ts` Playwright screenshots |
-| `tests/` | Unit tests for ingestion, layout lint, overlays, executor/replay (`npm test`) |
+| `web/src/` | React app: `App.tsx` (routes, generation progress), `Reader.tsx` (a paper with its live guide), live guide client (`live/`), diagram renderer (`diagram/`), styles (`theme.css` holds the shared tokens, `explain.css` the paper screen) |
+| `web/src/hex/` | The map: data stand-ins (`data/`), engine, world, game state, canvas (`MapController`, `draw.ts`), components and sheets (`sheets/LiveSheet.tsx` lists papers with a live guide) |
+| `eval/` | `run.ts` pipeline eval over a corpus, `live.ts` scripted live-guide eval (can save the session log), `shots.ts` Playwright screenshots |
+| `tests/` | Unit tests for ingestion, layout lint, overlays, executor, echo gate, and the map engine and game state (`tests/hex/`) (`npm test`) |
 
 ## Harness knobs
 

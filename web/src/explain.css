@@ -1,0 +1,181 @@
+/* The explainer: one paper as a sequence of diagrams, with the live guide beside it.
+   Laid out like the map: floating panels on the sea, over a faint hex grid. */
+.ex{
+  --hexgrid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='27.71'%3E%3Cpath d='M0 13.86L8 0H24L32 13.86L24 27.71H8ZM32 13.86H48' fill='none' stroke='%2315233B' stroke-opacity='.07' stroke-width='1'/%3E%3C/svg%3E");
+  height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);
+  background:var(--sea) var(--hexgrid) 0 0/48px 27.71px;
+  font-size:14.5px;line-height:1.42;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .ex{--hexgrid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='27.71'%3E%3Cpath d='M0 13.86L8 0H24L32 13.86L24 27.71H8ZM32 13.86H48' fill='none' stroke='%23E9EDF4' stroke-opacity='.05' stroke-width='1'/%3E%3C/svg%3E")}
+}
+:root[data-theme="dark"] .ex{--hexgrid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='27.71'%3E%3Cpath d='M0 13.86L8 0H24L32 13.86L24 27.71H8ZM32 13.86H48' fill='none' stroke='%23E9EDF4' stroke-opacity='.05' stroke-width='1'/%3E%3C/svg%3E")}
+
+.ex .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px rgba(10,20,40,.08)}
+.ex .hx{display:inline-block;flex:none;width:12px;height:10.4px;background:var(--c,var(--ink-2));clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+
+/* header: like the map's HUD on the left, its toolbar on the right */
+.ex-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;padding:10px 14px 10px}
+.ex-hud{padding:8px 12px 9px;max-width:min(760px,100%)}
+.crumb{display:flex;align-items:center;gap:6px;margin:0 0 2px;color:var(--ink-2);font-size:13.5px;font-weight:500}
+.crumb a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.crumb a:hover{color:var(--accent)}
+.ex-head h1{margin:0;font:700 27px/1.1 var(--serif);letter-spacing:-.005em}
+.ex-head .sub{margin:3px 0 0;font:italic 400 15.5px/1.35 var(--serif);color:var(--ink-2);max-width:72ch}
+.byline{margin:4px 0 0;color:var(--ink-2);font-size:13px}
+.ex-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;padding-top:4px}
+.ex-tools button,.ex-tools a{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 11px;font-size:14px;font-weight:500;cursor:pointer;line-height:1.2;white-space:nowrap;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:7px}
+.ex-tools button:hover,.ex-tools a:hover{border-color:var(--ink-2)}
+.ex-tools button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+
+/* the live pill: the one red thing on screen, only while a session is open */
+.livepill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.livepill i{width:9px;height:9px;border-radius:50%;background:var(--rev)}
+.livepill.on{color:var(--live)}
+.livepill.on i{background:var(--live);animation:pulse .8s ease-in-out infinite alternate}
+
+.work{display:grid;grid-template-columns:244px minmax(0,1fr) 420px;gap:12px;min-height:0;padding:0 12px 12px}
+
+/* left: the diagrams, then what the guide drew in this session */
+.toc{overflow:auto;min-height:0;padding:12px 8px 16px}
+.tgrp + .tgrp{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.toc h2{display:flex;align-items:center;gap:7px;font:600 13px/1.3 var(--sans);color:var(--ink-2);margin:0 0 6px 8px}
+.ti{appearance:none;display:grid;grid-template-columns:18px minmax(0,1fr);gap:0 6px;width:100%;text-align:left;border:0;background:none;border-radius:7px;padding:7px 8px;cursor:pointer;font-weight:500;line-height:1.3}
+.ti:hover{background:var(--hover)}
+.ti .n{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ti .dot{width:9px;height:9px;border-radius:50%;background:var(--mark);align-self:start;margin-top:4px}
+.ti .dot.pending{animation:pulse 1s ease-in-out infinite alternate}
+.ti .from{grid-column:2;color:var(--ink-2);font-size:12.5px;font-weight:400}
+.ti[aria-current="true"]{background:var(--ink);color:var(--panel);font-weight:600}
+.ti[aria-current="true"] .n,.ti[aria-current="true"] .from{color:inherit;opacity:.72}
+.toc .none{margin:0 8px;color:var(--ink-2);font-size:13.5px;line-height:1.4}
+
+/* centre: the diagram */
+.canvas{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:auto}
+.stagehead{display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap;margin:2px 4px 8px;flex:none}
+.stagehead h2{font:700 20px/1.2 var(--serif);margin:0}
+.stagehead h2 .n{color:var(--ink-2);margin-right:8px;font-variant-numeric:tabular-nums}
+.origin{margin:0;color:var(--ink-2);font-size:13px}
+.origin i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mark);margin-right:6px}
+.linkbtn{appearance:none;border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:600}
+.stagewrap{flex:none;overflow:hidden;position:relative;background-color:var(--panel);background-image:radial-gradient(circle,var(--line) 1px,transparent 1.3px);background-size:16px 16px}
+.stage{display:block;width:100%;height:auto;max-height:calc(100vh - 210px)}
+.stagewrap .busy{position:absolute;inset:auto 12px 10px auto;font-size:12.5px;color:var(--ink-2)}
+.notes{margin-top:12px;padding:16px 22px 18px;flex:none}
+
+/* right: the live guide */
+.side{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.side-head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 16px;border-bottom:1px solid var(--line)}
+.side-head h2{margin:0;font:700 19px/1.2 var(--serif)}
+.sidebody{overflow:auto;min-height:0;flex:1;overscroll-behavior:contain}
+
+.livecard{padding:22px 22px 18px}
+.livecard h3{margin:0 0 6px;font:700 22px/1.2 var(--serif);text-wrap:balance}
+.livecard p{margin:0 0 12px;font:400 16px/1.5 var(--serif);color:var(--body)}
+.livecard .go-big{display:flex;align-items:center;gap:10px;width:100%;margin:6px 0 14px;background:var(--ink);color:var(--panel);border:0;border-radius:10px;padding:13px 16px;font-size:16px;font-weight:600;cursor:pointer;text-align:left;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
+.livecard .go-big:hover{filter:brightness(1.08)}
+.livecard .go-big small{display:block;font-weight:400;font-size:13px;opacity:.75}
+.livecard .go-big .ring{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--live);color:#fff}
+.livecard h4{margin:16px 0 6px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.livecard ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.livecard li{display:flex;gap:8px;font-size:14px;line-height:1.4;color:var(--body)}
+.livecard li .hx{margin-top:4px}
+.asks{display:flex;flex-wrap:wrap;gap:6px}
+.xchip{appearance:none;display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:13.5px;font-weight:500;line-height:1.25;cursor:pointer;text-align:left}
+.xchip:hover{border-color:var(--ink-2)}
+.xchip.ask{border-style:dashed}
+
+/* read: the notes for the diagram on screen */
+.read h2{font:700 22px/1.22 var(--serif);letter-spacing:-.005em;margin:0 0 8px}
+.read p{font:400 16.5px/1.56 var(--serif);margin:0 0 10px;color:var(--body);hyphens:auto}
+.read p.rhint{font:400 13px/1.45 var(--sans);color:var(--ink-2);margin:12px 0 0}
+.read p.rhint i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mark);margin-right:6px}
+.read .src{font:400 12.5px/1.4 var(--sans);color:var(--ink-2);margin:8px 0 0}
+.part{margin:12px 0 0;padding:2px 0 2px 13px;border-left:3px solid var(--accent)}
+.part h3{font:600 14.5px/1.3 var(--sans);margin:0 0 4px}
+.read .part p{font-size:15.5px;margin:0 0 8px}
+.part .cby{font:400 13px/1.45 var(--sans);color:var(--ink-2);margin:0 0 8px}
+.part h4{font:600 13px/1.3 var(--sans);color:var(--ink-2);margin:10px 0 3px}
+.part ul{margin:0 0 6px;padding:0 0 0 17px}
+.part li{margin:2px 0}
+.part .note{font:italic 400 14.5px/1.45 var(--serif);color:var(--ink-2);margin:10px 0 0}
+.part .note span{display:block;font:400 12.5px/1.4 var(--sans);font-style:normal;color:var(--ink-2);margin-top:3px}
+.kind{display:flex;align-items:center;gap:7px;font-weight:600;font-size:13px;color:var(--ink-2);margin:0 0 5px}
+.kind i,.rlegend i{display:inline-block;width:13px;height:11px;background:var(--c);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.fogsw{background:repeating-linear-gradient(55deg,var(--ink-2) 0 1.5px,transparent 1.5px 4px)!important}
+.r-lineage{--c:var(--t-lineage)} .r-component{--c:var(--t-component)} .r-compare{--c:var(--t-compare)} .r-downstream{--c:var(--t-down)}
+.rlegend{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:3px 16px;font-size:13px;color:var(--ink-2)}
+.rlegend i{margin-right:6px;vertical-align:-1px}
+.fromrow{display:flex;flex-wrap:wrap;gap:6px}
+.pn{display:flex;justify-content:space-between;gap:10px;margin:16px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 11px;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px;line-height:1.2;color:var(--ink);text-decoration:none}
+.btn:hover{border-color:var(--ink-2)}
+.btn.go{background:var(--ink);border-color:var(--ink);color:var(--panel);font-weight:600}
+.btn.go:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+.pn .next{margin-left:auto}
+
+/* transcript of the live session */
+.tlines{padding:8px 18px 28px 8px}
+.turn{margin:0 0 10px}
+.who{font-weight:600;font-size:12.5px;color:var(--ink-2);margin:0 0 1px 13px}
+.who span{font-weight:400;margin-left:6px;font-variant-numeric:tabular-nums}
+.ln{font:400 16.5px/1.5 var(--serif);margin:0 0 2px;padding:3px 8px 4px 10px;border-left:3px solid transparent;border-radius:0 4px 4px 0;color:var(--body)}
+.turn.you .ln{font-style:italic;color:var(--ink)}
+.turn.guide:last-child .ln:last-of-type{border-left-color:var(--accent)}
+.toolnote{display:flex;align-items:center;gap:6px;font:400 12.5px/1.4 var(--sans);color:var(--ink-2);margin:2px 0 6px 13px}
+.toolnote::before{content:"";width:9px;height:7.8px;background:var(--mark);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.toolnote.err{color:var(--err)}
+.toolnote.err::before{background:var(--err)}
+.waiting{display:flex;align-items:center;gap:8px;color:var(--ink-2);padding:18px 20px;font-size:14px}
+
+.composer{flex:none;border-top:1px solid var(--line);padding:10px 12px 12px;background:var(--panel-2);display:grid;gap:8px}
+.composer form{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.composer input[type=text]{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:8px 10px;min-width:0}
+.composer input[type=text]:focus{border-color:var(--ink-2);outline:none}
+.mic{appearance:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;color:var(--ink-2)}
+.mic.on{background:var(--live);border-color:var(--live);color:#fff}
+.status{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.status label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}
+.level{height:4px;border-radius:2px;background:var(--line);overflow:hidden;width:60px}
+.level b{display:block;height:100%;background:var(--live)}
+
+/* generation progress, shown while a new paper is being drawn */
+.progress{max-width:640px;margin:0 auto;padding:40px 20px}
+.progress .card{padding:22px 24px}
+.progress h2{font:700 24px/1.2 var(--serif);margin:0 0 6px}
+.progress p{margin:0;color:var(--body)}
+.progress ol{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:6px}
+.progress li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.progress li small{color:var(--ink-2)}
+.st-ok{color:var(--ok)} .st-dropped{color:var(--err)} .st-generating,.st-repairing{color:var(--accent)}
+
+@media (max-width:1180px){
+  .work{grid-template-columns:220px minmax(0,1fr) 360px}
+}
+@media (max-width:980px){
+  html:has(.ex),html:has(.ex) body,html:has(.ex) #root{height:auto}
+  .ex{height:auto;min-height:100%;display:block}
+  .ex-head{padding:8px 10px}
+  .ex-head h1{font-size:22px}
+  .work{display:flex;flex-direction:column;gap:10px;padding:0 10px 10px}
+  .toc{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:6px 8px}
+  .tgrp{display:flex;align-items:center;gap:4px;flex:none}
+  .tgrp + .tgrp{margin:0 0 0 8px;padding:0 0 0 10px;border-top:0;border-left:1px solid var(--line)}
+  .toc h2,.ti .from,.toc .none{display:none}
+  .ti{display:flex;align-items:center;width:auto;white-space:nowrap}
+  .ti .dot{margin-top:0;align-self:center}
+  /* the live guide sits right under the diagram, ahead of the notes */
+  .canvas{display:contents}
+  .toc{order:0} .stagehead{order:1;margin:0 2px} .stagewrap{order:2} .side{order:3} .notes{order:4;margin-top:0}
+  .stage{max-height:48vh}
+  .side{overflow:visible}
+  .sidebody{overflow:visible}
+  .composer{position:sticky;bottom:0;border-radius:0 0 12px 12px}
+}
+@media (max-width:560px){
+  .ex-tools{justify-content:flex-start}
+  .ex-head .sub{font-size:14.5px}
+  .notes{padding:14px 16px}
+  .livecard{padding:18px 16px 14px}
+}

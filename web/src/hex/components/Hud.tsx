@@ -14,8 +14,8 @@ export function Hud() {
   const { view } = useGame();
   return (
     <header className="hud glass">
-      <h1><span className="secno">2</span>Related Work</h1>
-      <p className="sub">A hex-crawl through the literature around {view.focal.s}</p>
+      <h1>Related Work</h1>
+      <p className="sub">A hex-crawl through the literature around {view.focal.s}. A red dot means a live guide will talk you through that paper.</p>
       <p className="stats" aria-live="polite"><Stats /></p>
     </header>
   );
