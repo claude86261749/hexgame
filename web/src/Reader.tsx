@@ -73,7 +73,7 @@ export function Reader({ b }: { b: PaperBundle }) {
     });
     guide.current = g;
     g.setHeadphones(phones);
-    try { await g.start({ voice }); setMic(voice); }
+    try { await g.start({ voice, screen: `On screen: ${screenNow.current()}` }); setMic(voice); }
     catch (e: any) { setStatus({ s: 'error', msg: String(e?.message || e) }); guide.current = null; }
   }, [b.id, G, phones]);
   const stopGuide = useCallback(async () => {
@@ -103,7 +103,19 @@ export function Reader({ b }: { b: PaperBundle }) {
   }, [replay?.playing]);
 
   /* ------------- navigation */
-  const go = (v: View) => { setView(v); lastGuideView.current = gs.view ? gs.view.kind + gs.view.id : ''; if (replay) setReplay(r => r && { ...r, playing: false }); };
+  const go = (v: View) => { setView(v); lastGuideView.current = gs.view ? gs.view.kind + gs.view.id : ''; if (replay) setReplay(r => r && { ...r, playing: false }); tell(v, v.kind === 'g' ? sel[v.id] : null); };
+  /* what is on screen, in words, for the guide: sent when the reader changes it, and at the start of a session */
+  const onScreen = (v: View, part?: string | null) => {
+    const i = G.findIndex(d => d.id === v.id), d = G[i];
+    if (v.kind === 'g' && d) {
+      const p = part && (partsOf(d).find(x => x.id === part)?.title || (d.type === 'pipeline' ? d.steps.find(x => x.id === part)?.title : (d as any).tiles?.find((x: any) => x.id === part)?.label));
+      return `diagram ${i + 1}, "${d.nav}" (${d.id})${part ? `, with "${p || part}" (${part}) selected` : ''}.`;
+    }
+    const c = customs.find(x => x.id === v.id);
+    return c ? `the diagram "${c.nav}" (${c.id}), made earlier for one of the reader's questions.` : '';
+  };
+  const screenNow = useRef<() => string>(() => ''); screenNow.current = () => onScreen(view, view.kind === 'g' ? sel[view.id] : null);
+  const tell = (v: View, part?: string | null) => { const t = onScreen(v, part); if (t && guide.current && !replay) guide.current.screen(t); };
   const gi = G.findIndex(d => d.id === view.id);
   const custom = view.kind === 'c' ? (replayState?.customs || gstate.customs).find(c => c.id === view.id) || customs.find(c => c.id === view.id) : null;
 
@@ -114,7 +126,7 @@ export function Reader({ b }: { b: PaperBundle }) {
     const vs = { sel: sel[d.id] ?? null, x: xs[d.id], ref: refs[d.id] };
     const selectable = new Set(d.type === 'landscape' ? [...(d as LandscapeSpec).tiles.map(t => t.id), ...(d as LandscapeSpec).open.map(o => o.id)] : d.type === 'pipeline' ? d.steps.map(s => s.id) : partsOf(d).filter(p => p.note).map(p => p.id));
     stage = <Stage key={d.id} spec={d} vs={vs} selectable={selectable}
-      onSelect={id => setSel(s => ({ ...s, [d.id]: d.type === 'landscape' ? id : id ?? s[d.id] }))}
+      onSelect={id => { setSel(s => ({ ...s, [d.id]: d.type === 'landscape' ? id : id ?? s[d.id] })); if (id) tell(view, id); }}
       onScrub={x => setXs(s => ({ ...s, [d.id]: x }))} onRef={p => setRefs(s => ({ ...s, [d.id]: p }))} />;
     headN = <><span className="n">{gi + 1}</span>{d.nav}</>;
   } else if (custom) {

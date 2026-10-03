@@ -6,6 +6,7 @@ import { layout, partsOf } from '../shared/layout.ts';
 import { toolDecls } from '../shared/tools.ts';
 import { ai } from './gemini.ts';
 import { prompt, fill } from './prompts.ts';
+import { paperText } from './ingest.ts';
 import { StartSensitivity, EndSensitivity } from '@google/genai';
 
 export function manifest(ds: Diagram[]): string {
@@ -34,6 +35,18 @@ const digestText = (g: Digest) => [
   `Glossary:\n${g.glossary.map(x => `- ${x.term}: ${x.plain}`).join('\n')}`,
 ].join('\n\n');
 
+/** Everything the reader can see in each general diagram: heading, body, labels and the notes behind each element.
+ *  The spec as JSON, minus layout-only fields, so the guide can answer about any part the reader is looking at. */
+export function diagramContents(ds: Diagram[]): string {
+  const drop = new Set(['sources', 'caveat', 'x', 'y', 'w', 'h', 'pos', 'layout']);
+  return ds.map((d, i) => `### ${i + 1}. ${d.id}: ${d.nav}\n${JSON.stringify(d, (k, v) => (drop.has(k) ? undefined : v))}`).join('\n\n');
+}
+
+/** The paper's own text (sections with ids, no reference list), cut at LIVE_PAPER_CHARS so the session fits the live model's window. */
+export function liveText(doc: PaperDoc): string {
+  return paperText(doc, { refs: false, maxChars: Number(process.env.LIVE_PAPER_CHARS || 240_000) });
+}
+
 /** Compact section list for read_section: numbered sections up to depth 3, no references. */
 const liveSections = (doc: PaperDoc) => doc.sections
   .filter(s => /^(abstract|s[0-9A-Z]+(\.\d+){0,2})$/.test(s.id) && s.text.length > 200)
@@ -41,7 +54,8 @@ const liveSections = (doc: PaperDoc) => doc.sections
 
 /** `template` overrides prompts/live.md (used by the eval harness for A/B runs). */
 export function liveConfig(doc: PaperDoc, digest: Digest, diagrams: Diagram[], opts: { template?: string; nonBlocking?: boolean } = {}) {
-  const slots = { title: digest.title, byline: digest.byline, digest: digestText(digest), manifest: manifest(diagrams), sections: liveSections(doc), firstNav: diagrams[0]?.nav || '' };
+  const slots = { title: digest.title, byline: digest.byline, digest: digestText(digest), manifest: manifest(diagrams), sections: liveSections(doc), firstNav: diagrams[0]?.nav || '',
+    diagrams: diagramContents(diagrams), paper: liveText(doc) };
   const systemInstruction = opts.template ? fill(opts.template, slots, 'live') : prompt('live', slots);
   return {
     systemInstruction, tools: [{ functionDeclarations: toolDecls({ nonBlocking: opts.nonBlocking ?? process.env.LIVE_NONBLOCKING !== '0' }) }],

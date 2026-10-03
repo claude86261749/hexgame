@@ -29,14 +29,24 @@ export class Guide {
   private emit(e: SessionEvent) { this.events.push(e); this.cb.onEvent(e); }
   private setState(s: GuideState) { this.state = s; this.cb.onState(s); }
 
-  async start(opts: { voice: boolean }) {
+  async start(opts: { voice: boolean; screen?: string }) {
     this.speaker.unlock();
     this.t0 = performance.now();
     this.cb.onStatus('connecting');
     await this.connect();
     if (opts.voice) await this.setMic(true);
     // a silent nudge so the guide greets the reader; not recorded as a reader line
-    this.session!.sendClientContent({ turns: [{ role: 'user', parts: [{ text: '(The reader has opened the guide. The first diagram is on screen.)' }] }], turnComplete: true });
+    this.session!.sendClientContent({ turns: [{ role: 'user', parts: [{ text: `(The reader has opened the guide. ${opts.screen || 'The first diagram is on screen.'})` }] }], turnComplete: true });
+  }
+
+  /** Tell the guide what the reader is looking at after they changed it themselves. Context only (no reply is asked for),
+   *  and held back while the guide is answering, so it never cuts an answer off; only the latest one is sent. */
+  private screenNote?: string; private answering = false;
+  screen(text: string) { this.screenNote = text; this.flushScreen(); }
+  private flushScreen() {
+    if (!this.screenNote || this.answering || !this.session) return;
+    this.session.sendClientContent({ turns: [{ role: 'user', parts: [{ text: `(On screen: ${this.screenNote})` }] }], turnComplete: false });
+    this.screenNote = undefined;
   }
 
   private async connect() {
@@ -99,9 +109,11 @@ export class Guide {
   private onMessage(m: LiveServerMessage) {
     if (m.sessionResumptionUpdate?.resumable && m.sessionResumptionUpdate.newHandle) this.handle = m.sessionResumptionUpdate.newHandle;
     if (m.goAway) this.reconnect('server asked to reconnect');
-    if (m.toolCall?.functionCalls) for (const f of m.toolCall.functionCalls) this.runTool(f.id!, f.name!, f.args || {});
+    if (m.toolCall?.functionCalls) { this.answering = true; for (const f of m.toolCall.functionCalls) this.runTool(f.id!, f.name!, f.args || {}); }
     const sc = m.serverContent;
     if (!sc) return;
+    if (sc.modelTurn) this.answering = true;
+    if (sc.turnComplete || sc.interrupted) { this.answering = false; queueMicrotask(() => this.flushScreen()); }
     if (sc.inputTranscription?.text) this.emit({ t: this.now(), kind: 'you', text: sc.inputTranscription.text });
     if (sc.outputTranscription?.text) this.lastSpeech = this.now();
     if (sc.outputTranscription?.text && !this.dropTurn) this.emit({ t: this.now(), kind: 'guide', text: sc.outputTranscription.text });
