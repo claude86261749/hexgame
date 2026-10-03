@@ -1,4 +1,5 @@
 # Papers, explained in diagrams
+LIVE: https://voice-clusters-burlington-tan.trycloudflare.com/map/
 
 Turn any research paper (as Markdown) into a short sequence of interactive diagrams, plus a live guide you can talk to that draws new diagrams for your questions. React front end, a small Node server, `gemini-3.8-flash` for generating diagrams, `gemini-3.8-live` for the spoken guide.
 
